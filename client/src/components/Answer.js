@@ -1,5 +1,5 @@
 
-export default function Answer({model,answerText,answerUser,answerDate}) {
+export default function Answer({answerText, answerUser, answerDate}) {
     let aText = replaceHyperlinks(answerText);
     return (
         <div className="acolumn">

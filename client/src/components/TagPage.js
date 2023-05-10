@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Tag from "./Tag";
 
-export default function TagPage( {model, setSideColor, setQuery, setSortBy, nextState} ) {
+export default function TagPage( {model, setSideColor, setQuery, nextState} ) {
     const [update, setUpdate] = useState({val: 0, tags: [], questions: []})
     if (update["val"] === 0) {
     model.get("http://localhost:8000/tags")
@@ -24,12 +24,10 @@ export default function TagPage( {model, setSideColor, setQuery, setSortBy, next
     let tableContents = tagGroups.map((tagGroup) => 
         <tr key={tagGroup[0]._id}>
             {tagGroup.map((tag) => 
-                <Tag model={model}
-                    tag={tag}
+                <Tag tag={tag}
                     questions={update["questions"]}
                     setSideColor={setSideColor}
                     setQuery={setQuery}
-                    setSortBy={setSortBy}
                     nextState={nextState}
                     key={tag._id}/>
             )}

@@ -1,15 +1,15 @@
-export default function Tag( {model, tag, questions, setSideColor, setQuery, setSortBy, nextState} ) {
+export default function Tag( {tag, questions, setSideColor, setQuery, nextState} ) {
     let numQuestions = getCountByTag(questions, tag._id);
     let query = {
         nontags: [],
-        tags: [tag.name.toLowerCase()]
+        tags: [tag.name.toLowerCase()],
+        sortBy: undefined
     }
     return (
         <>
             <td>
                 <button onClick={() => {
                     setQuery(query);
-                    setSortBy("");
                     setSideColor(0);
                     nextState(0);
                 }}>

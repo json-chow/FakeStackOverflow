@@ -23,8 +23,8 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
                 </input>
             </div>
             <button className="loginBtn" onClick={async () => { // BUTTON IS PRESSED, ACCOUNT IS SAVED, THEN DIRECT USER TO LOGIN
-            var flag = await credentialsValid(model,username,password)
-            flag = 1;
+            // var flag = await credentialsValid(model,username,password)
+            let flag = 1;
                     if (flag === 1) {
                         nextState(0);
                         console.log(`${username} login successful.`)
