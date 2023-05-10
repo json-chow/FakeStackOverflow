@@ -22,6 +22,7 @@ export default function FakeStackOverflow() {
 
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [userState, setUserState] = useState(0);
 
 
     /*
@@ -31,6 +32,24 @@ export default function FakeStackOverflow() {
                     setSortBy={setSortBy}
                     nextState={setShowState}/>
     */
+        <div className="menu main">
+            <h2>Welcome to the greatest webthingy of all time.</h2>
+            <button id="register" onClick={() => {
+                setUserState("Registered");
+            }}>
+                Register
+            </button>
+            <button id="login" onClick={() => {
+                setUserState(7);
+            }}>
+                Returning User
+            </button>
+            <button id="guest" onClick={() => {
+                setUserState(8);
+            }}>
+                Continue as Guest
+            </button>
+        </div>
 
     return (
         <>
