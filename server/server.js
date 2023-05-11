@@ -23,7 +23,8 @@ app.get("/", async (req, res) => {
     let questions = await Question.find({});
     let tags = await Tag.find({});
     let answers = await Answer.find({});
-    res.send({questions, tags, answers});
+    let accounts = await Account.find({});
+    res.send({questions, tags, answers, accounts});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
@@ -46,9 +47,6 @@ app.post("/new_account", async(req, res) => {
     }
     let newAccount = new Account(accountFields);
     await newAccount.save();
-    console.log("\n\n\n\n\n\n\n\n");
-    console.log(newAccount);
-    console.log("\n\n\n\n\n\n\n\n\n");
     res.sendStatus(200);
 });
 

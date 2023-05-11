@@ -8,7 +8,7 @@ export default function Question( {model, question, nextState, setCurrentQuestio
             <div className="qcolumn mid">
                 <button style={{display: "block"}} onClick={() => {
                     nextState(1);
-                    setCurrentQuestion(question)
+                    setCurrentQuestion(question);
                     // model.incrementView(question.qid)
                 }}>
                     {question.title}

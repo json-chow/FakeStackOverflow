@@ -126,7 +126,7 @@ function detectBadHyperlink() {
         if (!link.match(link_re)) {
             return 1;
         }
-    } 
+    }
     return 0;
 }
 
@@ -165,8 +165,6 @@ async function processQuestionPost(model, candidateQuestion) {
             i++;
         }
         candidateQuestion.tagIds[0] = tempList;
-        // this.addQuestion(candidateQuestion);
-        // this.addTags(candidateQuestion);
         console.log(candidateQuestion);
         await model.post("http://localhost:8000/new_question", candidateQuestion)
             .then(console.log("good"));

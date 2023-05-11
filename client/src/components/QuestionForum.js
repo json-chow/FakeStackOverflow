@@ -1,7 +1,7 @@
 import Question from "./Question";
 import { useState } from "react";
 
-export default function QuestionForum( {model, query, setQuery, setSideColor, sortBy, setSortBy, nextState, setCurrentQuestion} ) {
+export default function QuestionForum( {model, userState, query, setQuery, setSideColor, sortBy, setSortBy, nextState, setCurrentQuestion} ) {
     const [update, setUpdate] = useState({val: 0, questions: [], tags: [], answers: []})
     if (update["val"] === 0) {
         model.get("http://localhost:8000/")
@@ -13,6 +13,11 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, so
     let answers = update["answers"];
     let tags = update["tags"];
     let questionRows;
+
+    let showButton = false;
+    if (userState === 'n' || userState === 'r') {
+        showButton = true;
+    }
     // Searching feature
     if (query.nontags.length !== 0 || query.tags.length !== 0) {
         let shown_questions = []
@@ -70,7 +75,7 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, so
             <div className="menu main top">
                 <div>
                     <h2>All Questions</h2>
-                    <button id="askquestion" onClick={() => {
+                    <button id="askquestion" hidden={showButton} onClick={() => {
                         setSideColor(-1);
                         nextState(2);
                     }}>

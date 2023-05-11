@@ -599,7 +599,7 @@ CSS tags for 'Question Post' section:
 }
 
 
-.usrTxt {
+.usrTxt, .newUsernameText, .newPasswordText, .newAccountNameText {
     width: 500px;
     height: 40px;
     columns: 50;
@@ -626,15 +626,21 @@ CSS tags for 'Question Post' section:
 .loginBtn {
     color: black;
     background-color: green;
+    margin-top: 5%;
+    padding-top: 10px;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-bottom: 10px;
+}
+
+.createAccountBtn {
+    color: black;
+    background-color: green;
+    margin-top: 5%;
     padding-top: 10px;
     padding-bottom: 10px;
 }
 
-#createAccountBtn {
-    color: black;
-    background-color: rgb(183, 52, 5);
-    margin-left: 43%;
-    margin-top: 0%;
-    padding-top: 10px;
-    padding-bottom: 10px;
+.newUsernameText:invalid, .newPasswordText:invalid, .newAccountNameText:invalid {
+    border: 2px solid red;
 }

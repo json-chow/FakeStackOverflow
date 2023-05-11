@@ -22,48 +22,26 @@ export default function FakeStackOverflow() {
 
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [userState, setUserState] = useState(0);
-
-
-    /*
-    <Sidebar sideColor={sideColor} // goes after <Header onQueryChange={setQuery}/> <div id="main" className="main">
-                    setSideColor={setSideColor}
-                    setQuery={setQuery}
-                    setSortBy={setSortBy}
-                    nextState={setShowState}/>
-    */
-        <div className="menu main">
-            <h2>Welcome to the greatest webthingy of all time.</h2>
-            <button id="register" onClick={() => {
-                setUserState("Registered");
-            }}>
-                Register
-            </button>
-            <button id="login" onClick={() => {
-                setUserState(7);
-            }}>
-                Returning User
-            </button>
-            <button id="guest" onClick={() => {
-                setUserState(8);
-            }}>
-                Continue as Guest
-            </button>
-        </div>
+    const [userState, setUserState] = useState("");
 
     return (
         <>
             <Header onQueryChange={setQuery}/>
             <div id="main" className="main">
+            {[0, 1, 2, 3, 4].includes(showState) && 
+                <Sidebar sideColor={sideColor} // goes after <Header onQueryChange={setQuery}/> <div id="main" className="main">
+                setSideColor={setSideColor}
+                setQuery={setQuery}
+                nextState={setShowState}/>}
 
                 {showState === 0 && 
                     <QuestionForum model={axios}
+                        userState={userState}
                         query={query}
                         setQuery={setQuery}
                         setSideColor={setSideColor}
                         sortBy={sortBy}
                         setSortBy={setSortBy}
-
                         nextState={setShowState}
                         setCurrentQuestion={setCurrentQuestion}/>
                     }

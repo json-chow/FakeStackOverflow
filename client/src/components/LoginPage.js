@@ -1,6 +1,14 @@
 import { useState } from "react";
 
 export default function LoginPage( {model, setSideColor, nextState} ) {
+    const [update, setUpdate] = useState({val: 0, accounts: []});
+    if (update["val"] === 0) {
+        model.get("http://localhost:8000/")
+        .then((res) => {
+            setUpdate({val:1, accounts: res.data["accounts"]})
+        })
+    }
+    let accounts = update.accounts;
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     return (
@@ -23,14 +31,12 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
                 </input>
             </div>
             <button className="loginBtn" onClick={async () => { // BUTTON IS PRESSED, ACCOUNT IS SAVED, THEN DIRECT USER TO LOGIN
-            var flag = await credentialsValid(model,username,password)
-            flag = 1;
+            var flag = await credentialsValid(model,username,password,accounts);
                     if (flag === 1) {
                         nextState(0);
-                        console.log(`${username} login successful.`)
+                        console.log(`${username} login successful.`);
                     }
                     else if (flag === 0) {
-                        nextState(0);
                         console.log("Please provide your login information.");
                     }
                     else if (flag === -1) {
@@ -40,24 +46,27 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
                         console.log("Password is incorrect, please try again.");
                     }
                     else {
-                        console.log("ERROR!!!");
+                        console.log(`${username} login failed.`);
                     }
-                    console.log(`${username} login failed.`);
             }}>Login</button>
             <p className="mandatoryFieldsWarning">* indicates mandatory fields</p>
         </div>
     )
 }
 
-async function credentialsValid(model,usr,pwd) {
+async function credentialsValid(model,usr,pwd,accounts) {
+    if (accounts === undefined) {
+        return -1;
+    }
     if (!usr || !pwd || usr.trim()<=0 || pwd.trim()<=0) {
         return 0;
     }
-    var usernameExists = await model.get({username: usr, password: pwd});
+    let usernameExists = accounts.find(({username}) => username === usr);
+    console.log(usernameExists);
     if (!usernameExists) {
         return -1;
     }
-    var passwordExists = await model.get({username: usr, password: pwd});
+    let passwordExists = accounts.find(({password}) => password === pwd);
     if (!passwordExists) {
         return -2;
     }
