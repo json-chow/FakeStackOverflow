@@ -8,7 +8,7 @@ export default function CreateAccountPage( {model, nextState} ) {
     
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
-        model.get("http://localhost:8000/")
+        model.get("http://localhost:8000/new_answer")
         .then((res) => {
             setUpdate({val:1, accounts: res.data["accounts"]})
         })

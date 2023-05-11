@@ -19,11 +19,36 @@ var cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
-app.get("/", async (req, res) => {
+app.get("/new_answer", async (req, res) => {
     let questions = await Question.find({});
     let tags = await Tag.find({});
     let answers = await Answer.find({});
-    res.send({questions, tags, answers});
+    let accounts = await Account.find({});
+    res.send({questions, tags, answers, accounts});
+});
+
+app.get("/", async (req, res) => {
+    let tags, questions;
+    if (req.query.tags === undefined && req.query.nontags === undefined) {
+        if (req.query.sortBy === "active") {
+            questions = await Question.aggregate([
+                {$lookup: {from: "answers", localField: "answers", foreignField: "_id", as: "latest_answer"}},
+                {$sort: {"latest_answer.ans_date_time": -1}}
+            ]);
+        } else if (req.query.sortBy === "unanswered") {
+            questions = await Question.find({answers: {$size: 0}})
+        } else {
+            questions = await Question.find({}).sort({ask_date_time: "desc"})
+        }
+    } else {
+        let nontags = req.query.nontags && req.query.nontags.map((e) => "\\b" + e + "\\b");
+        let nontags_regex = nontags ? nontags.join("|") : "a^";
+        let q_tags = await Tag.find({name: {$in: req.query.tags}});
+        let tids = q_tags && q_tags.map((e) => e._id);
+        questions = await Question.find({$or: [{title: {$regex: nontags_regex, $options: "i"}}, {tags: {$in: tids}}]});
+    }
+    tags = await Tag.find({});
+    res.send({questions, tags});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
