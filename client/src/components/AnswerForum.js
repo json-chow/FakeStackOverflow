@@ -11,7 +11,7 @@ export default function AnswerForum( {model, nextState, currentQuestion} ) {
                 currentQuestion = res.data["question"];
                 shown_answers = answers.map((answer) => {
                     if (currentQuestion.answers.includes(answer._id)) {
-                        return <Answer model={model} key={answer._id} answerId={answer._id} answerText={answer.text} answerUser={answer.ans_by} answerDate={answer.ans_date_time}/>
+                        return <Answer key={answer._id} answerText={answer.text} answerUser={answer.ans_by} answerDate={answer.ans_date_time}/>
                     } else {
                         return null;
                     }

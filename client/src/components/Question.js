@@ -1,4 +1,4 @@
-export default function Question( {model, question, nextState, setCurrentQuestion, tags} ) {
+export default function Question( {question, nextState, setCurrentQuestion, tags} ) {
     return (
         <div className="qcolumn">
             <div className="qcolumn left">
@@ -8,8 +8,7 @@ export default function Question( {model, question, nextState, setCurrentQuestio
             <div className="qcolumn mid">
                 <button style={{display: "block"}} onClick={() => {
                     nextState(1);
-                    setCurrentQuestion(question);
-                    // model.incrementView(question.qid)
+                    setCurrentQuestion(question)
                 }}>
                     {question.title}
                 </button>
@@ -20,7 +19,7 @@ export default function Question( {model, question, nextState, setCurrentQuestio
             <div className="qcolumn right">
                     <p>
                         {question.asked_by}
-                        <span>{getTimeString(question.ask_date_time, "asked")}</span>                        
+                        <span>{getTimeString(question.ask_date_time, "asked")}</span>
                     </p>
             </div>
         </div>

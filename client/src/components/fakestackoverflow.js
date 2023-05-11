@@ -1,5 +1,4 @@
 import { useState } from 'react';
-// import Model from '../models/model.js';
 import Header from './Header.js';
 import QuestionForum from './QuestionForum.js';
 import AnswerForum from './AnswerForum.js';
@@ -16,13 +15,38 @@ import Guest from './Guest.js';
 const axios = require("axios");
 
 export default function FakeStackOverflow() {
-    const [query, setQuery] = useState({nontags: [], tags: []});
+    const [query, setQuery] = useState({nontags: [], tags: [], sortBy: undefined});
     const [sideColor, setSideColor] = useState(0);
-    const [sortBy, setSortBy] = useState("");
 
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [userState, setUserState] = useState("");
+    const [userState, setUserState] = useState(0);
+
+
+    /*
+    <Sidebar sideColor={sideColor} // goes after <Header onQueryChange={setQuery}/> <div id="main" className="main">
+                    setSideColor={setSideColor}
+                    setQuery={setQuery}
+                    nextState={setShowState}/>
+    */
+        <div className="menu main">
+            <h2>Welcome to the greatest webthingy of all time.</h2>
+            <button id="register" onClick={() => {
+                setUserState("Registered");
+            }}>
+                Register
+            </button>
+            <button id="login" onClick={() => {
+                setUserState(7);
+            }}>
+                Returning User
+            </button>
+            <button id="guest" onClick={() => {
+                setUserState(8);
+            }}>
+                Continue as Guest
+            </button>
+        </div>
 
     return (
         <>
@@ -40,8 +64,6 @@ export default function FakeStackOverflow() {
                         query={query}
                         setQuery={setQuery}
                         setSideColor={setSideColor}
-                        sortBy={sortBy}
-                        setSortBy={setSortBy}
                         nextState={setShowState}
                         setCurrentQuestion={setCurrentQuestion}/>
                     }
@@ -63,7 +85,6 @@ export default function FakeStackOverflow() {
                     <TagPage model={axios}
                         setSideColor={setSideColor}
                         setQuery={setQuery}
-                        setSortBy={setSortBy}
                         nextState={setShowState}/>}
                 {showState === 5 &&
                     <WelcomePage model={axios}

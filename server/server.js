@@ -23,8 +23,7 @@ app.get("/", async (req, res) => {
     let questions = await Question.find({});
     let tags = await Tag.find({});
     let answers = await Answer.find({});
-    let accounts = await Account.find({});
-    res.send({questions, tags, answers, accounts});
+    res.send({questions, tags, answers});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
