@@ -3,7 +3,7 @@ import { useState } from "react";
 
 var prevQuery = {tags: [], nontags: [], sortBy: undefined};
 
-export default function QuestionForum( {model, query, setQuery, setSideColor, nextState, setCurrentQuestion} ) {
+export default function QuestionForum( {model, userState, query, setQuery, setSideColor, nextState, setCurrentQuestion} ) {
     const [update, setUpdate] = useState({val: 0, questions: [], tags: []})
     if (update["val"] === 0) {
         model.get("http://localhost:8000/", {
@@ -16,6 +16,10 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
             .then((res) => {
                 setUpdate({val: 1, questions: res.data["questions"], tags: res.data["tags"]})
             })
+    }
+    let showButton = false;
+    if (userState === 'n' || userState === 'r') {
+        showButton = true;
     }
     let questions = update["questions"];
     let tags = update["tags"];
