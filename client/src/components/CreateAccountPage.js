@@ -163,7 +163,7 @@ async function processAccountInfo(model, accounts, accInfo) {
         document.getElementsByClassName("pwd1").hidden = false;
         return -4;
     }
-    await model.post("http://localhost:8000/", accInfo)
+    await model.post("http://localhost:8000/new_account", accInfo)
         .then(console.log("good"));
         return 1;
 };
