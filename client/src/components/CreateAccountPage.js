@@ -8,7 +8,7 @@ export default function CreateAccountPage( {model, nextState} ) {
     
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
-        model.get("http://localhost:8000/new_answer")
+        model.get("http://localhost:8000/")
         .then((res) => {
             setUpdate({val:1, accounts: res.data["accounts"]})
         })
@@ -163,7 +163,7 @@ async function processAccountInfo(model, accounts, accInfo) {
         document.getElementsByClassName("pwd1").hidden = false;
         return -4;
     }
-    await model.post("http://localhost:8000/new_account", accInfo)
+    await model.post("http://localhost:8000/", accInfo)
         .then(console.log("good"));
         return 1;
 };

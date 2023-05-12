@@ -19,16 +19,8 @@ var cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
-app.get("/new_answer", async (req, res) => {
-    let questions = await Question.find({});
-    let tags = await Tag.find({});
-    let answers = await Answer.find({});
-    let accounts = await Account.find({});
-    res.send({questions, tags, answers, accounts});
-});
-
 app.get("/", async (req, res) => {
-    let tags, questions;
+    let tags, questions, accounts;
     if (req.query.tags === undefined && req.query.nontags === undefined) {
         if (req.query.sortBy === "active") {
             questions = await Question.aggregate([
@@ -48,7 +40,8 @@ app.get("/", async (req, res) => {
         questions = await Question.find({$or: [{title: {$regex: nontags_regex, $options: "i"}}, {tags: {$in: tids}}]});
     }
     tags = await Tag.find({});
-    res.send({questions, tags});
+    accounts = await Account.find({});
+    res.send({questions, tags, accounts});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
