@@ -21,14 +21,7 @@ export default function FakeStackOverflow() {
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [userState, setUserState] = useState(0);
-
-
-    /*
-    <Sidebar sideColor={sideColor} // goes after <Header onQueryChange={setQuery}/> <div id="main" className="main">
-                    setSideColor={setSideColor}
-                    setQuery={setQuery}
-                    nextState={setShowState}/>
-    */
+    
         <div className="menu main">
             <h2>Welcome to the greatest webthingy of all time.</h2>
             <button id="register" onClick={() => {
@@ -50,13 +43,13 @@ export default function FakeStackOverflow() {
 
     return (
         <>
-            <Header onQueryChange={setQuery}/>
+            <Header onQueryChange={setQuery} showState={showState}/>
             <div id="main" className="main">
-            {[0, 1, 2, 3, 4].includes(showState) && 
-                <Sidebar sideColor={sideColor} // goes after <Header onQueryChange={setQuery}/> <div id="main" className="main">
-                setSideColor={setSideColor}
-                setQuery={setQuery}
-                nextState={setShowState}/>}
+                {[0, 1, 2, 3, 4].includes(showState) && 
+                    <Sidebar sideColor={sideColor}
+                    setSideColor={setSideColor}
+                    setQuery={setQuery}
+                    nextState={setShowState}/>}
 
                 {showState === 0 && 
                     <QuestionForum model={axios}

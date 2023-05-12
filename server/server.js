@@ -20,34 +20,57 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", async (req, res) => {
-    let tags, questions, accounts;
+    let tags, questions, maxPages, numQuestions, accounts;
+    let limit = parseInt(req.query.limit);
+    let page = parseInt(req.query.page);
+    console.log(page, limit);
     if (req.query.tags === undefined && req.query.nontags === undefined) {
         if (req.query.sortBy === "active") {
             questions = await Question.aggregate([
                 {$lookup: {from: "answers", localField: "answers", foreignField: "_id", as: "latest_answer"}},
-                {$sort: {"latest_answer.ans_date_time": -1}}
+                {$sort: {"latest_answer.ans_date_time": -1}},
+                {$skip: (page - 1) * limit},
+                {$limit: limit}
             ]);
         } else if (req.query.sortBy === "unanswered") {
-            questions = await Question.find({answers: {$size: 0}})
-        } else {
-            questions = await Question.find({}).sort({ask_date_time: "desc"})
+            questions = await Question.find({answers: {$size: 0}}).limit(limit).skip((page - 1) * limit);
+        } else { // Sort by newest first
+            questions = await Question.find({}).sort({ask_date_time: "desc"}).limit(limit).skip((page - 1) * limit);
         }
+        numQuestions = await Question.estimatedDocumentCount();
+        questions.push(numQuestions);
     } else {
         let nontags = req.query.nontags && req.query.nontags.map((e) => "\\b" + e + "\\b");
         let nontags_regex = nontags ? nontags.join("|") : "a^";
         let q_tags = await Tag.find({name: {$in: req.query.tags}});
         let tids = q_tags && q_tags.map((e) => e._id);
-        questions = await Question.find({$or: [{title: {$regex: nontags_regex, $options: "i"}}, {tags: {$in: tids}}]});
+        questions = await Question
+                            .find({$or: [{title: {$regex: nontags_regex, $options: "i"}}, {tags: {$in: tids}}]})
+                            .limit(limit)
+                            .skip((page - 1) * limit);
+        numQuestions = (await Question.find({$or: [{title: {$regex: nontags_regex, $options: "i"}}, {tags: {$in: tids}}]})).length;
+        questions.push(numQuestions);
     }
+    maxPages = Math.ceil(numQuestions / limit);
     tags = await Tag.find({});
+    console.log("Max pages: " + maxPages)
     accounts = await Account.find({});
-    res.send({questions, tags, accounts});
+    res.send({questions, tags, maxPages, accounts});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
-    let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {views: 1}}, {new: true});
-    let answers = await Answer.find({}).sort({ans_date_time: 'desc'});
-    res.send({question, answers});
+    console.log(req.query.incViews);
+    let limit = parseInt(req.query.limit);
+    let page = parseInt(req.query.page);
+    let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {views: req.query.incViews ? 1 : 0}}, {new: true});
+    let numAnswers = (await Answer.find({_id: {$in: question.answers}}).sort({ans_date_time: 'desc'})).length;
+    let answers = await Answer
+                        .find({_id: {$in: question.answers}})
+                        .sort({ans_date_time: 'desc'})
+                        .limit(limit)
+                        .skip((page - 1) * limit);
+    let maxPages = Math.ceil(numAnswers / limit);
+    res.send({question, answers, numAnswers, maxPages});
 })
 
 app.get("/tags", async(req, res) => {

@@ -1,6 +1,6 @@
 
-export default function Answer({answerText, answerUser, answerDate}) {
-    let aText = replaceHyperlinks(answerText);
+export default function Answer({answer}) {
+    let aText = replaceHyperlinks(answer.text);
     return (
         <div className="acolumn">
             <div className="acolumn left">
@@ -8,8 +8,8 @@ export default function Answer({answerText, answerUser, answerDate}) {
             </div>
 
             <div className="acolumn right">
-                <p className="author">{answerUser}</p>
-                <p className="dateAsked">{getTimeString(answerDate, "answered")}</p>
+                <p className="author">{answer.ans_by}</p>
+                <p className="dateAsked">{getTimeString(answer.ans_date_time, "answered")}</p>
             </div>
 
         </div>
