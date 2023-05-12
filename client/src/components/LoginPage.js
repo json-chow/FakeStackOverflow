@@ -3,7 +3,7 @@ import { useState } from "react";
 export default function LoginPage( {model, setSideColor, nextState} ) {
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
-        model.get("http://localhost:8000/")
+        model.get("http://localhost:8000/new_account")
         .then((res) => {
             setUpdate({val:1, accounts: res.data["accounts"]})
         })

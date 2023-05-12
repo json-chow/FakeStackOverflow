@@ -5,6 +5,7 @@ html {
 
 body {
     height: 100%;
+    overflow: hidden;
 }
 
 #root {
@@ -20,7 +21,7 @@ section {
     background-color: lightgray;
     height: 10%;
     border: 1px solid black;
-    text-align: right;
+    text-align: center;
     overflow: hidden;
 }
 
@@ -30,7 +31,7 @@ section {
 
 #header input {
     margin-left: 15%;
-    margin-right: 10%;
+    margin-right: -30%;
     font-size: 15px
 }
 
@@ -69,6 +70,7 @@ section {
 .menu.main {
     width: 85%;
     height: 100%;
+    padding-bottom: 10px
 }
 
 .menu.main.top {

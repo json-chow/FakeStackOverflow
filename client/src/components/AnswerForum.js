@@ -2,31 +2,34 @@ import { useState } from 'react';
 import Answer from './Answer.js';
 
 export default function AnswerForum( {model, nextState, currentQuestion} ) {
-    const [update, setUpdate] = useState({val: 0, answers: "", question: currentQuestion});
+    const [update, setUpdate] = useState({val: 0, answers: "", question: currentQuestion, numAnswers: 0, page: 1, max: 1, incViews: 1});
     let shown_answers;
+    console.log(update["val"], update["page"]);
     if (update["val"] === 0) {
-        model.get(`http://localhost:8000/posts/question/${currentQuestion._id}`)
+        model.get(`http://localhost:8000/posts/question/${currentQuestion._id}`, {
+            params: {
+                page: update["page"],
+                limit: 5,
+                incViews: update["incViews"]
+            }
+        })
             .then((res) => {
                 let answers = res.data["answers"];
                 currentQuestion = res.data["question"];
                 shown_answers = answers.map((answer) => {
-                    if (currentQuestion.answers.includes(answer._id)) {
-                        return <Answer key={answer._id} answerText={answer.text} answerUser={answer.ans_by} answerDate={answer.ans_date_time}/>
-                    } else {
-                        return null;
-                    }
+                    return <Answer key={answer._id} answer={answer}/>
                 })
-                setUpdate({val: 1, answers: shown_answers, question: res.data["question"]});
+                setUpdate({val: 1, answers: shown_answers, question: res.data["question"], numAnswers: res.data["numAnswers"], page: update["page"], max: parseInt(res.data["maxPages"])});                
             })
     }
     let qText = currentQuestion.text;
     qText = replaceHyperlinks(qText);
     return (
         <div className="menu main">
-            <div className="menu main top">
+            {update["val"] === 1 && <div className="menu main top">
                 <div className="aqtcolumn">
                     <div className="aqtcolumn left">
-                        <p>{currentQuestion.answers.length + " answers"}</p>
+                        <p>{update["numAnswers"] + " answers"}</p>
                     </div>
                     <div className="aqtcolumn mid">
                         <p>{currentQuestion.title}</p>
@@ -48,15 +51,23 @@ export default function AnswerForum( {model, nextState, currentQuestion} ) {
                         <p>{getTimeString(currentQuestion.ask_date_time, "asked")}</p>
                     </div>
                 </div>
-            </div>
-            <div className="menu main bottom">
+            </div>}
+            {update["val"] === 1 && <div className="menu main bottom">
                 {update["answers"]}
                 <div className="abuttoncolumn">
                     <button id="answerquestion" onClick={() => {
                         nextState(3);
                     }}>Answer Question</button>
                 </div>
-            </div>
+                {update["numAnswers"] > 5 && <button id="prevQ" onClick={() => {
+                    if (update["page"] !== 1) {
+                        setUpdate({val: 0, question: update["question"], page: update["page"] - 1, max: update["max"]});
+                    }
+                    }}>Prev</button>}
+                {update["numAnswers"] > 5 && <button id="nextQ" onClick={() => {
+                    setUpdate({val: 0, question: update["question"], page: (update["page"] % update["max"]) + 1, max: update["max"]});
+                    }}>Next</button>}
+            </div>}
         </div>
     )
 }

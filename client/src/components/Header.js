@@ -1,9 +1,9 @@
-export default function Header( {onQueryChange} ) {
+export default function Header( {onQueryChange, showState} ) {
     return (
         <div id="header" className="header">
             <h1>Fake Stack Overflow</h1>
-            <input 
-                type="text"
+            {[0, 1, 2, 3, 4].includes(showState) && 
+              <input type="text"
                 name="search"
                 id="search"
                 placeholder="Search ..."
@@ -11,7 +11,8 @@ export default function Header( {onQueryChange} ) {
                     if (e.key === "Enter")
                         onQueryChange(parseQuery(e.target.value));
                 }}
-            />
+              />
+            }
         </div>
     )
 }
