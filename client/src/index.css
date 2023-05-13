@@ -91,6 +91,65 @@ section {
     width: 100%;
 }
 
+.menu.main.top2 {
+    margin-left: 11%;
+    width: 50%;
+}
+
+.cmnt {
+    border-top: 1px solid lightgray;
+    font-size: 14px;
+}
+
+.cmntby {
+    color: rgb(0, 116, 204);
+}
+
+.cmnttime {
+    color: dimgray;
+}
+
+.addcmnt {
+    color: gray;
+    font-size: 14px;
+    border: none;
+    background-color: white;
+}
+
+.addcmnt:active {
+    color: red;
+}
+
+.upvote {
+    width: 0px;
+    height: 0px;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 20px solid #555;
+    border-top: 0px;
+    padding: 0;
+    background-color: white;
+}
+
+.upvote:active {
+    border-bottom: 20px solid red;
+}
+
+.downvote {
+    width: 0px;
+    height: 0px;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 20px solid #555;
+    border-bottom: 0px;
+    padding: 0;
+    background-color: white;
+}
+
+.downvote:active {
+    border-top: 20px solid red;
+}
+
 #noquestions {
     font-size: xx-large;
     font-weight: bold;
@@ -155,7 +214,7 @@ a {
 
 .qcolumn.mid button {
     margin-top: 1em;
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
     font-size: large;
     border: none;
     background-color: white;
@@ -167,6 +226,10 @@ a {
     color: red;
 }
 
+.qcolumn.mid div {
+    margin-bottom: 0.5em;
+}
+
 .qtag {
     border: 1px solid black;
     border-radius: 5px;
@@ -174,6 +237,8 @@ a {
     margin-inline-end: 5px;
     color: white;
     padding: 0px 10px;
+    display: inline-block;
+    margin-bottom: 0.5em;
 }
 
 .qcolumn.right {
@@ -197,7 +262,6 @@ a {
     float: left;
     overflow: hidden;
     width: 100%;
-    margin-left: -1%;
 }
 
 .aqtcolumn.left {
@@ -220,7 +284,6 @@ a {
     float: left;
     overflow: hidden;
     width: 100%;
-    margin-left: -1%;
 }
 
 .aqbcolumn.left {
@@ -250,16 +313,28 @@ a {
     border-bottom: 1px dotted black;
     margin-left: -1%;
     width: 101%;
+    padding-bottom: 2px;
 }
 
 .acolumn.left {
-    padding-left: 3%;
-    width: 60%;
+    display: flex;
+    margin-left: 0%;
+    width: 8%;
+    border-bottom: 0;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1%;
+}
+
+.acolumn.mid {
+    width: 52%;
+    padding-left: 0%;
     border-bottom: 0;
 }
 
 .acolumn.right {
-    padding-left: 7%;
+    padding-left: 0%;
     border-bottom: 0;
     width: 30%;
 }
@@ -335,22 +410,6 @@ a {
 CSS tags for 'Question Post' section:
 */
 
-.addDetailsHeader {
-    padding-left: 9%;
-    width: 91%;
-    display: inline-block;
-    font-size: medium;
-    font-style: italic;
-}
-
-.addKeywordsHeader {
-    padding-left: 9%;
-    width: 91%;
-    display: inline-block;
-    font-size: medium;
-    font-style: italic;
-}
-
 .postQuestion {
     background-color: #3090E2;
     color: white;
@@ -360,7 +419,7 @@ CSS tags for 'Question Post' section:
     padding-bottom: 10px;
 }
 
-.questionTextHeader {
+.askQHeader {
     text-align: left;
     padding-left: 8%;
     width: 92%;
@@ -371,18 +430,7 @@ CSS tags for 'Question Post' section:
     margin-block-end: 0;
 }
 
-.questionTitleHeader {
-    text-align: left;
-    padding-left: 8%;
-    width: 92%;
-    height: 0%;
-    display: inline-block;
-    font-size: x-large;
-    font-weight:bolder;
-    margin-block-end: 0;
-}
-
-.subtitle {
+.askQGuide {
     padding-left: 9%;
     width: 91%;
     display: inline-block;
@@ -420,17 +468,6 @@ CSS tags for 'Question Post' section:
     border: 2px solid red;
 }
 
-.questionTagsHeader {
-    text-align: left;
-    padding-left: 8%;
-    width: 92%;
-    height: 0%;
-    display: inline-block;
-    font-size: x-large;
-    font-weight:bolder;
-    margin-block-end: 0;
-}
-
 .questionText {
     width: 500px;
     height: 50px;
@@ -446,15 +483,19 @@ CSS tags for 'Question Post' section:
     border: 2px solid red;
 }
 
-.usernameHeader {
-    text-align: left;
-    padding-left: 8%;
-    width: 92%;
-    height: 0%;
-    display: inline-block;
-    font-size: x-large;
-    font-weight: bolder;
-    margin-block-end: 0;
+.questionSummary {
+    width: 500px;
+    height: 50px;
+    columns: 50;
+    margin-left: 8%;
+    margin-right: 10%;
+    font-size: 15px;
+    resize: none;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.questionSummary:invalid {
+    border: 2px solid red;
 }
 
 .usernameText {

@@ -1,18 +1,25 @@
+import CommentSection from "./CommentSection";
+import Vote from "./Vote";
 
-export default function Answer({answer}) {
+export default function Answer({model, answer}) {
     let aText = replaceHyperlinks(answer.text);
     return (
-        <div className="acolumn">
-            <div className="acolumn left">
-                <p>{aText}</p>
-            </div>
+      <div className="acolumn">
+          <div className="acolumn left">
+              <Vote model={model} aid={answer._id}/>
+          </div>
 
-            <div className="acolumn right">
-                <p className="author">{answer.ans_by}</p>
-                <p className="dateAsked">{getTimeString(answer.ans_date_time, "answered")}</p>
-            </div>
+          <div className="acolumn mid">
+              <p>{aText}</p>
+              <br/>
+              <CommentSection model={model} aid={answer._id}/>
+          </div>
 
-        </div>
+          <div className="acolumn right">
+              <p className="author">{answer.ans_by}</p>
+              <p className="dateAsked">{getTimeString(answer.ans_date_time, "answered")}</p>
+          </div>
+      </div>
     )
 }
 

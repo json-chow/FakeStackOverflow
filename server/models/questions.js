@@ -7,7 +7,12 @@ const questionSchema = new Schema({
     title: {
         type: String,
         required: true,
-        maxLength: 100
+        maxLength: 50
+    },
+    summary: {
+        type: String,
+        required: true,
+        maxLength: 140
     },
     text: {
         type: String,
@@ -23,6 +28,10 @@ const questionSchema = new Schema({
         type: [Schema.Types.ObjectId],
         ref: "Answer"
     },
+    comments: {
+        type: [Schema.Types.ObjectId],
+        ref: "Comment"
+    },
     asked_by: {
         type: String,
         default: "Anonymous"
@@ -34,7 +43,11 @@ const questionSchema = new Schema({
     views: {
         type: Number,
         default: 0
-    }
+    },
+    votes: {
+        type: Number,
+        default: 0
+    },
 });
 
 questionSchema.virtual("url").get(function() {

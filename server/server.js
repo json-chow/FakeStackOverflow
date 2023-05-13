@@ -10,9 +10,10 @@ var sessions = require("express-session");
 let Account = require('./models/accounts');
 let Answer = require('./models/answers');
 let Question = require('./models/questions');
-let Salt = require('./models/salts');
+// let Salt = require('./models/salts');
 let Session = require('./models/sessions');
 let Tag = require('./models/tags');
+let Comment = require('./models/comments');
 let UserProfile = require("./models/users");
 
 const mongoose = require("mongoose");
@@ -115,9 +116,8 @@ app.post("/new_account", async(req, res) => {
 
 app.get("/", async (req, res) => {
     let tags, questions, maxPages, numQuestions, accounts;
-    let limit = parseInt(req.query.limit);
+    let limit = 5
     let page = parseInt(req.query.page);
-    console.log(page, limit);
     if (req.query.tags === undefined && req.query.nontags === undefined) {
         if (req.query.sortBy === "active") {
             questions = await Question.aggregate([
@@ -129,10 +129,11 @@ app.get("/", async (req, res) => {
         } else if (req.query.sortBy === "unanswered") {
             questions = await Question.find({answers: {$size: 0}}).limit(limit).skip((page - 1) * limit);
         } else { // Sort by newest first
-            questions = await Question.find({}).sort({ask_date_time: "desc"}).limit(limit).skip((page - 1) * limit);
+            questions = await Question.find({}).sort({ask_date_time: -1, _id: -1}).limit(limit).skip((page - 1) * limit);
         }
         numQuestions = await Question.estimatedDocumentCount();
         questions.push(numQuestions);
+        
     } else {
         let nontags = req.query.nontags && req.query.nontags.map((e) => "\\b" + e + "\\b");
         let nontags_regex = nontags ? nontags.join("|") : "a^";
@@ -147,26 +148,87 @@ app.get("/", async (req, res) => {
     }
     maxPages = Math.ceil(numQuestions / limit);
     tags = await Tag.find({});
-    console.log("Max pages: " + maxPages)
     accounts = await Account.find({});
     res.send({questions, tags, maxPages, accounts});
 });
 
 app.get("/posts/question/:qid", async (req, res) => {
-    console.log(req.query.incViews);
-    let limit = parseInt(req.query.limit);
+    let limit = 5
     let page = parseInt(req.query.page);
-    let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {views: req.query.incViews ? 1 : 0}}, {new: true});
+    let question = await Question
+                            .findByIdAndUpdate(req.params.qid, {$inc: {views: req.query.incViews ? 1 : 0}}, {new: true});
+    let tags = await Tag.find({_id: {$in: question.tags}});
     let numAnswers = (await Answer.find({_id: {$in: question.answers}}).sort({ans_date_time: 'desc'})).length;
     let answers = await Answer
                         .find({_id: {$in: question.answers}})
-                        .sort({ans_date_time: 'desc'})
+                        .sort({ans_date_time: -1, _id: -1})
                         .limit(limit)
                         .skip((page - 1) * limit);
     let maxPages = Math.ceil(numAnswers / limit);
-    res.send({question, answers, numAnswers, maxPages});
-});
+    res.send({question, answers, tags, numAnswers, maxPages});
+})
 
+app.get("/posts/question/:qid/comments", async (req, res) => {
+    let cpage = parseInt(req.query.cpage);
+    let question = await Question.findById(req.params.qid);
+    let numQComments = (await Comment.find({_id: {$in: question.comments}})).length;
+    let comments = await Comment.find({_id: {$in: question.comments}}).sort({cmnt_date_time: -1, _id: -1}).limit(3).skip((cpage - 1) * 3);
+    let maxPages = Math.ceil(numQComments / 3);
+    res.send({comments, maxPages})
+})
+
+app.get("/posts/answer/:aid/comments", async (req, res) => {
+    let cpage = parseInt(req.query.cpage);
+    let answer = await Answer.findById(req.params.aid);
+    let numQComments = (await Comment.find({_id: {$in: answer.comments}})).length;
+    let comments = await Comment.find({_id: {$in: answer.comments}}).sort({cmnt_date_time: -1, _id: -1}).limit(3).skip((cpage - 1) * 3);
+    let maxPages = Math.ceil(numQComments / 3);
+    res.send({comments, maxPages})
+})
+
+app.post("/posts/question/:qid/comments", async (req, res) => {
+    let cmntFields = {
+        text: req.body.text,
+        cmnt_by: req.body.cmnt_by,
+        cmnt_date_time: req.body.cmnt_date_time
+    };
+    let newComment = new Comment(cmntFields);
+    await newComment.save();
+    await Question.findByIdAndUpdate(req.params.qid, {$push: {comments: newComment}});
+    res.sendStatus(200);
+})
+
+app.post("/posts/answer/:aid/comments", async (req, res) => {
+    let cmntFields = {
+        text: req.body.text,
+        cmnt_by: req.body.cmnt_by,
+        cmnt_date_time: req.body.cmnt_date_time
+    };
+    let newComment = new Comment(cmntFields);
+    await newComment.save();
+    await Answer.findByIdAndUpdate(req.params.aid, {$push: {comments: newComment}});
+    res.sendStatus(200);
+})
+
+app.get("/posts/question/:qid/votes", async (req, res) => {
+    let question = await Question.findById(req.params.qid);
+    res.send({votes: question.votes})
+})
+
+app.get("/posts/answer/:aid/votes", async (req, res) => {
+    let answer = await Answer.findById(req.params.aid);
+    res.send({votes: answer.votes})
+})
+
+app.post("/posts/question/:qid/votes/:amt", async (req, res) => {
+    let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {votes: parseInt(req.params.amt)}});
+    res.send({votes: question.votes})
+})
+
+app.post("/posts/answer/:aid/votes/:amt", async (req, res) => {
+    let answer = await Answer.findByIdAndUpdate(req.params.aid, {$inc: {votes: parseInt(req.params.amt)}});
+    res.send({votes: answer.votes})
+})
 
 app.get("/tags", async(req, res) => {
     let questions = await Question.find({});
@@ -190,6 +252,7 @@ app.post("/new_question", async(req, res) => {
     let newTags = await getNewTags(req.body.tagIds[0]);
     let questionFields = {
         title: req.body.title,
+        summary: req.body.summary,
         text: req.body.text,
         tags: newTags,
         asked_by: req.body.askedBy,

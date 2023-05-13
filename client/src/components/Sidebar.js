@@ -8,7 +8,7 @@ export default function Sidebar( {sideColor, setSideColor, setQuery, setSortBy, 
                     onClick={() => {
                         setSideColor(0);
                         nextState(0);
-                        setQuery({nontags:[], tags:[]});
+                        setQuery({nontags:[], tags:[], reset: 1});
                     }}>
                     Questions
                 </button>

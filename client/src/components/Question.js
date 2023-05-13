@@ -2,6 +2,7 @@ export default function Question( {question, nextState, setCurrentQuestion, tags
     return (
         <div className="qcolumn">
             <div className="qcolumn left">
+                <p>{question.votes} votes</p>
                 <p>{question.answers.length} answers</p>
                 <p>{question.views} views</p>
             </div>
@@ -12,6 +13,7 @@ export default function Question( {question, nextState, setCurrentQuestion, tags
                 }}>
                     {question.title}
                 </button>
+                <div>{replaceHyperlinks(question.summary)}</div>
                 {question.tags.map(tagId => 
                     <span className="qtag" key={tagId}>{getTagNameFromId(tags, tagId)}</span>
                 )}
@@ -70,4 +72,23 @@ function getTimeString(time, type) {
       + " at " + time.getHours() + ":" + min;
     }
     return dateString;
+}
+
+function replaceHyperlinks(text) {
+  let re = /\[([^\]]*?)\]\((.*?)\)/g;
+  let matches = [...text.matchAll(re)];
+  let newTextArr = [];
+  let ind = 0;
+  for (let i=0; i<matches.length; i++) {
+      let match = matches[i][0];
+      let atext = matches[i][1];
+      let url = matches[i][2];
+      let sind = matches[i].index;
+      let eind = matches[i].index + match.length;
+      newTextArr.push(text.slice(ind, sind));
+      newTextArr.push(<a href={url}>{atext}</a>);
+      ind = eind;
+  }
+  newTextArr.push(text.slice(ind, text.length));
+  return newTextArr;
 }

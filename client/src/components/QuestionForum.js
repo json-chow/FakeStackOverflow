@@ -4,21 +4,23 @@ import { useState } from "react";
 var prevQuery = {tags: [], nontags: [], sortBy: undefined};
 
 export default function QuestionForum( {model, query, setQuery, setSideColor, nextState, notLoggedIn, setCurrentQuestion} ) {
-    const [update, setUpdate] = useState({val: 0, questions: [], tags: [], numQuestions: 0});
-    const [page, setPage] = useState({page: 1, max: 1});
-    if (update["val"] === 0 || page["update"] === 1) {
+    const [update, setUpdate] = useState({val: 0, questions: [], tags: [], numQuestions: 0, page: 1, max: 1});
+    if (update["val"] === 0) {
         model.get("http://localhost:8000/", {
             params: {
                 tags: query.tags,
                 nontags: query.nontags,
                 sortBy: query.sortBy,
-                page: page["page"],
-                limit: 5
+                page: update["page"],
             }
         })
             .then((res) => {
-                setUpdate({val: 1, questions: res.data["questions"], tags: res.data["tags"], numQuestions: res.data["questions"].pop()})
-                setPage({page: page["page"], max: parseInt(res.data["maxPages"])});
+                setUpdate({val: 1,
+                           questions: res.data["questions"],
+                           tags: res.data["tags"],
+                           numQuestions: res.data["questions"].pop(),
+                           page: update["page"],
+                           max: parseInt(res.data["maxPages"])})
             })
     }
     let questions = update["questions"];
@@ -28,19 +30,23 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
     if (prevQuery === undefined) {
         prevQuery = query;
     }
-    if (queryEquals(prevQuery, query) === false) {
+    if (queryEquals(prevQuery, query) === false || query.reset !== undefined) {
         model.get("http://localhost:8000/", {
             params: {
                 tags: query.tags,
                 nontags: query.nontags,
                 sortBy: query.sortBy,
                 page: 1,
-                limit: 5
             },
         })
             .then((res) => {
-                setUpdate({val: 1, questions: res.data["questions"], tags: res.data["tags"], numQuestions: res.data["questions"].pop()})
-                setPage({page: 1, max: res.data["maxPages"]});
+                setQuery({...query, reset: undefined})
+                setUpdate({val: 1,
+                           questions: res.data["questions"],
+                           tags: res.data["tags"],
+                           numQuestions: res.data["questions"].pop(),
+                           page: 1,
+                           max: res.data["maxPages"]});
             })
         prevQuery = query;
     }
@@ -79,12 +85,12 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
             {update["val"] === 1 && <div className="menu main bottom">
                 {questionRows}
                 {numQuestions > 5 && <button id="prevQ" onClick={() => {
-                    if (page["page"] !== 1) {
-                        setPage({update: 1, page: page["page"] - 1, max: page["max"]});
+                    if (update["page"] !== 1) {
+                        setUpdate({val: 0, page: update["page"] - 1, max: update["max"]});
                     }
                     }}>Prev</button>}
                 {numQuestions > 5 && <button id="nextQ" onClick={() => {
-                    setPage({update: 1, page: (page["page"] % page["max"]) + 1, max: page["max"]});
+                    setUpdate({val: 0, page: (update["page"] % update["max"]) + 1, max: update["max"]});
                     }}>Next</button>}
             </div>}
         </div>

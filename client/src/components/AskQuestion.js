@@ -3,14 +3,15 @@ import { useState } from "react";
 
 export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn} ) {
     const [titleText, setTitleText] = useState("");
+    const [questionSummary, setQuestionSummary] = useState("");
     const [questionText, setQuestionText] = useState("");
     const [usernameText, setUsernameText] = useState("");
     const [questionTags, setQuestionTags] = useState("");
     return (
         <div className="menu main">
             <div>
-                <p className="questionTitleHeader" style={{fontSize: "30px"}}>Question Title*</p>
-                <p className="subtitle" style={{fontSize: "15px"}}>Limit title to 100 characters or less</p>
+                <p className="askQHeader" style={{fontSize: "30px"}}>Question Title*</p>
+                <p className="askQGuide" style={{fontSize: "15px"}}>Limit title to 50 characters or less</p>
                 <input className="titleText"
                     pattern="(\s*\S+\s*)+"
                     value={titleText}
@@ -21,12 +22,32 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                     }}>
                 </input>
                 <div id="titleError" className="qError" hidden={true}>
-                    Please enter a valid title -- title must not be empty and not more than 100 characters.
+                    Please enter a valid title -- title must not be empty and not more than 50 characters.
+                </div>
+            </div>
+            <div>
+                <p className="askQHeader" style={{fontSize: "30px"}}>Question Summary*</p>
+                <p className="askQGuide" style={{fontSize: "15px"}}>Limit summary to 140 characters or less</p>
+                <input className="questionSummary"
+                    pattern="(\s*\S+\s*)+"
+                    value={questionSummary}
+                    onChange={(e) => {
+                        setQuestionSummary(e.target.value);
+                        document.getElementById("summaryError").hidden = true;
+                        document.getElementById("summaryLinkError").hidden = true;
+                        displayInvalidQInput(e);
+                    }}>
+                </input>
+                <div id="summaryError" className="qError" hidden={true}>
+                    Please enter a valid summary -- summary must not be empty and not more than 140 characters.
+                </div>
+                <div id="summaryLinkError" className="qError" hidden={true}>
+                    Error with summary -- summary is empty or some hyperlink is invalid.
                 </div>
             </div>
             <div className="question">
-                <p className="questionTextHeader" style={{fontSize: "30px"}}>Question Text*</p>
-                <p className="addDetailsHeader">Add details</p>
+                <p className="askQHeader" style={{fontSize: "30px"}}>Question Text*</p>
+                <p className="askQGuide">Add details</p>
                 <input className="questionText"
                     pattern="(\s*\S+\s*)+"
                     value={questionText}
@@ -45,8 +66,8 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                 </div>
             </div>
             <div>
-                <p className="questionTagsHeader">Tags*</p>
-                <p className="addKeywordsHeader">Add keywords separated by whitespace</p>
+                <p className="askQHeader">Tags*</p>
+                <p className="askQGuide">Add keywords separated by whitespace</p>
                 <input className="questionTags"
                     pattern="\s*(\S{1,10}\s+){0,4}\S{1,10}\s*"
                     value={questionTags}
@@ -61,7 +82,7 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                 </div>
             </div>
             <div>
-                <p className="usernameHeader">Username*</p>
+                <p className="askQHeader">Username*</p>
                 <input className="usernameText"
                     pattern="(\s*\S+\s*)+"
                     value={usernameText}
@@ -76,11 +97,14 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                 </div>
             </div>
             <button className="postQuestion" hidden={notLoggedIn} onClick={async () => {
-                if (detectBadHyperlink()) {
+                if (detectBadHyperlink("questionText")) {
                     document.getElementById("hyperlinkError").hidden = false;
+                } else if (detectBadHyperlink("questionSummary")) {
+                    document.getElementById("summaryLinkError").hidden = false;
                 } else {
                     let result = await processQuestionPost(model, {
                         title: titleText,
+                        summary: questionSummary,
                         text: questionText,
                         tagIds: Array(questionTags.trim().split(" ")),
                         askedBy : usernameText,
@@ -104,20 +128,25 @@ function displayInvalidQInput(e) {
             document.getElementById("titleError").hidden = false;
         } else if (cName === "questionText") {
             document.getElementById("questionError").hidden = false;
+        } else if (cName === "questionSummary") {
+            document.getElementById("summaryError").hidden = false;
         } else if (cName === "questionTags") {
             document.getElementById("tagError").hidden = false;
         } else {
             document.getElementById("userError").hidden = false;
         }
     } else {
-        if (cName === "titleText" && e.target.value.length > 100) {
+        if (cName === "titleText" && e.target.value.length > 50) {
             document.getElementById("titleError").hidden = false;
+        }
+        if (cName === "questionSummary" && e.target.value.length > 140) {
+            document.getElementById("summaryError").hidden = false;
         }
     }
 }
 
-function detectBadHyperlink() {
-    let element = document.getElementsByClassName("questionText")[0];
+function detectBadHyperlink(className) {
+    let element = document.getElementsByClassName(className)[0];
     let re = /\[[^\]]*?\]\((.*?)\)/g;
     let matches = [...element.value.matchAll(re)];
     for (let i=0; i<matches.length; i++) {
@@ -132,8 +161,12 @@ function detectBadHyperlink() {
 
 async function processQuestionPost(model, candidateQuestion) {
     var tMismatch = document.getElementsByClassName("titleText")[0].validity.patternMismatch;
-    if (tMismatch || candidateQuestion.title.length === 0 || candidateQuestion.title.length > 100) {
+    if (tMismatch || candidateQuestion.title.length === 0 || candidateQuestion.title.length > 50) {
         document.getElementById("titleError").hidden = false;
+    }
+    var sMismatch = document.getElementsByClassName("questionSummary")[0].validity.patternMismatch;
+    if (sMismatch || candidateQuestion.summary.length === 0 || candidateQuestion.summary.length > 140) {
+        document.getElementById("summaryError").hidden = false;
     }
     var qMismatch = document.getElementsByClassName("questionText")[0].validity.patternMismatch;
     if (qMismatch || candidateQuestion.text.length === 0) {
@@ -147,9 +180,11 @@ async function processQuestionPost(model, candidateQuestion) {
     if (uMismatch || candidateQuestion.askedBy.length === 0) {
         document.getElementById("userError").hidden = false;
     }  
-    var mismatch = tMismatch || qMismatch || tagMismatch || uMismatch;
-    if (candidateQuestion.title.length <= 100
+    var mismatch = tMismatch || sMismatch || qMismatch || tagMismatch || uMismatch;
+    if (candidateQuestion.title.length <= 50
+        && candidateQuestion.summary.length <= 140
         && candidateQuestion.title.trim().length >= 1
+        && candidateQuestion.summary.trim().length >= 1
         && candidateQuestion.text.trim().length >= 1
         && candidateQuestion.tagIds.length >= 1
         && candidateQuestion.tagIds[0][0].trim().length >= 1
@@ -165,10 +200,8 @@ async function processQuestionPost(model, candidateQuestion) {
             i++;
         }
         candidateQuestion.tagIds[0] = tempList;
-        console.log(candidateQuestion);
         await model.post("http://localhost:8000/new_question", candidateQuestion)
             .then(console.log("good"));
-        console.log("1");
         return 1;
     } else {
         return 0;
