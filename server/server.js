@@ -10,7 +10,6 @@ var sessions = require("express-session");
 let Account = require('./models/accounts');
 let Answer = require('./models/answers');
 let Question = require('./models/questions');
-// let Salt = require('./models/salts');
 let Session = require('./models/sessions');
 let Tag = require('./models/tags');
 let Comment = require('./models/comments');
@@ -69,36 +68,6 @@ app.post('/user', async(req,res) => {
         }
     }
 });
-
-/*
-app.get("/new_session", async (req, res) => {
-    console.log("Body of Request: " + req.body);
-    let foundSession = await Session.find({secret: req.body.secret});
-    console.log(foundSession);
-    if (foundSession) {
-        res.send(foundSession);
-    }
-    res.send(0);
-});
-
-app.post("/new_session", async(req, res) => {
-    let plaintext = req.body.password;
-    console.log("Plaintext: " + plaintext);
-    const ciphertext = await bcrypt.hash(plaintext, salt);
-    console.log("Ciphertext: " + ciphertext);
-    let passwordExists = Account.find({password: ciphertext});
-    if (!passwordExists) {
-        res.send("No cookie for you :( ");
-    }
-    const sessionId = Math.random().toPrecision(21).toString();
-    console.log("Session ID: " + sessionId);
-    res.cookie("name", sessionId, {httpOnly: false});
-    const newSession = new Session({secret: sessionId});
-    console.log("New Session: " + newSession);
-    await newSession.save();
-    res.send("Have a cookie :>) ");
-});
-*/
 
 app.post("/new_account", async(req, res) => {
     const saltRounds = 10;
@@ -220,6 +189,11 @@ app.get("/posts/answer/:aid/votes", async (req, res) => {
     res.send({votes: answer.votes})
 })
 
+app.get("/comments/:cid/votes", async (req, res) => {
+    let comment = await Comment.findById(req.params.cid);
+    res.send({votes: comment.votes})
+})
+
 app.post("/posts/question/:qid/votes/:amt", async (req, res) => {
     let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {votes: parseInt(req.params.amt)}});
     res.send({votes: question.votes})
@@ -228,6 +202,11 @@ app.post("/posts/question/:qid/votes/:amt", async (req, res) => {
 app.post("/posts/answer/:aid/votes/:amt", async (req, res) => {
     let answer = await Answer.findByIdAndUpdate(req.params.aid, {$inc: {votes: parseInt(req.params.amt)}});
     res.send({votes: answer.votes})
+})
+
+app.post("/comments/:cid/votes/:amt", async (req, res) => {
+    let comment = await Comment.findByIdAndUpdate(req.params.cid, {$inc: {votes: parseInt(req.params.amt)}});
+    res.send({votes: comment.votes})
 })
 
 app.get("/tags", async(req, res) => {

@@ -1,10 +1,17 @@
-export default function Comment( {comment} ){
+import Vote from "./Vote";
+
+export default function Comment( {model, comment} ){
     return (
         <div className="cmnt">
-            {replaceHyperlinks(comment.text)}
-            <span>{" - "}</span> 
-            <span className="cmntby">{comment.cmnt_by}</span>
-            <span className="cmnttime">{getTimeString(comment.cmnt_date_time)}</span>
+            <div className="cmnt left">
+                <Vote model={model} cid={comment._id}/>
+            </div>
+            <div className="cmnt right">
+                {replaceHyperlinks(comment.text)}
+                <span>{" - "}</span> 
+                <span className="cmntby">{comment.cmnt_by}</span>
+                <span className="cmnttime">{getTimeString(comment.cmnt_date_time)}</span>
+            </div>
         </div>
     )
 }

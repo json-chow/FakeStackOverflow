@@ -17,7 +17,7 @@ export default function CommentSection( {model, qid, aid} ) {
             }}).then((res) => {
                 let comments = res.data["comments"];
                 let shown_cmnts = comments.map((comment) => 
-                    <Comment key={comment._id} comment={comment}/>
+                    <Comment key={comment._id} model={model} comment={comment}/>
                 )
                 setUpdate({val: 1, cmnts: shown_cmnts, page: update["page"], max: res.data["maxPages"]});
             }

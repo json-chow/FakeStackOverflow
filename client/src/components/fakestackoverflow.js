@@ -23,16 +23,13 @@ export default function FakeStackOverflow() {
 
     return (
         <>
-            <Header onQueryChange={setQuery} showState={showState}/>
+            <Header nextState={setShowState} userState={setUserState} notLoggedIn={notLoggedIn} onQueryChange={setQuery} showState={showState}/>
             <div id="main" className="main">
                 {[0, 1, 2, 3, 4].includes(showState) && 
                     <Sidebar sideColor={sideColor}
                     setSideColor={setSideColor}
                     setQuery={setQuery}
                     nextState={setShowState}/>}
-                {([0, 1, 2, 3, 4].includes(showState) && notLoggedIn === 0) && 
-                    <LogoutBtn nextState = {setShowState}
-                    userState={setUserState}/>}
                 {showState === 0 && 
                     <QuestionForum model={axios}
                         query={query}

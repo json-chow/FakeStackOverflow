@@ -21,17 +21,19 @@ section {
     background-color: lightgray;
     height: 10%;
     border: 1px solid black;
-    text-align: center;
     overflow: hidden;
 }
 
-#header h1 {
+#header span {
     display: inline-block;
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 0.5em;
+    margin-left: 42%
 }
 
 #header input {
-    margin-left: 15%;
-    margin-right: -30%;
+    margin-left: 10%;
     font-size: 15px
 }
 
@@ -51,8 +53,6 @@ section {
     font-size: 18px;
     text-align: center;
     margin-right: -1px;
-    /* display: flex;
-    flex-direction: column; */
 }
 
 #tags, #questions {
@@ -99,6 +99,35 @@ section {
 .cmnt {
     border-top: 1px solid lightgray;
     font-size: 14px;
+    float: left;
+    width: 100%;
+}
+
+.cmnt.left {
+    border-top: 0;
+    width: 10%
+}
+
+.cmnt.right {
+    border-top: 0;
+    width: 90%
+}
+
+.cmnt button {
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 12px solid darkgray;
+    vertical-align: text-top;
+    padding-top: 1%;
+}
+
+.cmnt button:active {
+    border-bottom: 12px solid red;
+}
+
+.cmnt .voteNum {
+    display: inline-block;
+    padding-left: 8%;
 }
 
 .cmntby {
@@ -125,7 +154,7 @@ section {
     height: 0px;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-bottom: 20px solid #555;
+    border-bottom: 20px solid darkgray;
     border-top: 0px;
     padding: 0;
     background-color: white;
@@ -140,7 +169,7 @@ section {
     height: 0px;
     border-left: 15px solid transparent;
     border-right: 15px solid transparent;
-    border-top: 20px solid #555;
+    border-top: 20px solid darkgray;
     border-bottom: 0px;
     padding: 0;
     background-color: white;
@@ -695,7 +724,7 @@ CSS tags for 'Question Post' section:
 #logoutBtn {
     color: black;
     background-color: rgb(183, 52, 5);
-    margin-left: 78.99%;
+    margin-left: 9%;
     padding: 10px;
     padding-left: 10px;
     padding-right: 10px;
