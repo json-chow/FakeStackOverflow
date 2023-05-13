@@ -1,9 +1,9 @@
-// Account Document Schema
+// User Profile Document Schema
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const accountSchema = new Schema({
+const userProfileSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -21,8 +21,8 @@ const accountSchema = new Schema({
     }
 });
 
-accountSchema.virtual("url").get(function() {
-    return "posts/account/" + this._id;
+userProfileSchema.virtual("url").get(function() {
+    return "posts/user/" + this._id;
 });
 
-module.exports = mongoose.model("Account", accountSchema);
+module.exports = mongoose.model("User", userProfileSchema);

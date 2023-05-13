@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function LoginPage( {model, setSideColor, nextState} ) {
+export default function LoginPage( {model, userState, nextState} ) {
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
         model.get("http://localhost:8000/")
@@ -8,7 +8,6 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
             setUpdate({val:1, accounts: res.data["accounts"]})
         })
     }
-    let accounts = update.accounts;
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     return (
@@ -22,6 +21,12 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
                         setUsername(e.target.value);
                     }}>
                 </input>
+                <div id="usrW0" hidden={true}>
+                    Please enter a valid username -- username should contain at least one character.
+                </div>
+                <div id="usrW1" hidden={true}>
+                    No account is registered under this username. Please register account and try again.
+                </div>
                 <h3>Password:</h3>
                 <input className="pwdTxt"
                     value={password}
@@ -29,46 +34,41 @@ export default function LoginPage( {model, setSideColor, nextState} ) {
                         setPassword(e.target.value);
                     }}>
                 </input>
+                <div id="pwdW0" hidden={true}>
+                    Please enter a valid password -- password should contain at least one character.
+                </div>
+                <div id="pwdW1" hidden={true}>
+                    Password is incorrect, please try again.
+                </div>
             </div>
             <button className="loginBtn" onClick={async () => { // BUTTON IS PRESSED, ACCOUNT IS SAVED, THEN DIRECT USER TO LOGIN
-            var flag = await credentialsValid(model,username,password,accounts);
-                    if (flag === 1) {
+                let flag = 1;
+                document.getElementById("usrW0").hidden = true;
+                document.getElementById("usrW1").hidden = true;
+                document.getElementById("pwdW0").hidden = true;
+                document.getElementById("pwdW1").hidden = true;
+                if (username === "") {
+                    document.getElementById("usrW0").hidden = false;
+                    flag = 0;
+                }
+                if (password === "") {
+                    document.getElementById("pwdW0").hidden = false;
+                }
+                if (flag) {
+                    const userSession = await model.post("http://localhost:8000/user", {username,password});
+                    console.log("userSession.data: " + userSession.data);
+                    if (userSession.data === "accessGranted") {
+                        const cookie = await model.get("http://localhost:8000/new_cookie");
+                        console.log("COOKIE: \n" + cookie.val);
+                        userState(0);
                         nextState(0);
-                        console.log(`${username} login successful.`);
-                    }
-                    else if (flag === 0) {
-                        console.log("Please provide your login information.");
-                    }
-                    else if (flag === -1) {
-                        console.log(`No account registered with username: ${username}`);
-                    }
-                    else if (flag === -2) {
-                        console.log("Password is incorrect, please try again.");
                     }
                     else {
-                        console.log(`${username} login failed.`);
+                        document.getElementById(userSession.data).hidden = false;
                     }
+                }
             }}>Login</button>
-            <p className="mandatoryFieldsWarning">* indicates mandatory fields</p>
+            <p className="mandatoryFieldsWarning">* indicates incorrect input for fields</p>
         </div>
     )
-}
-
-async function credentialsValid(model,usr,pwd,accounts) {
-    if (accounts === undefined) {
-        return -1;
-    }
-    if (!usr || !pwd || usr.trim()<=0 || pwd.trim()<=0) {
-        return 0;
-    }
-    let usernameExists = accounts.find(({username}) => username === usr);
-    console.log(usernameExists);
-    if (!usernameExists) {
-        return -1;
-    }
-    let passwordExists = accounts.find(({password}) => password === pwd);
-    if (!passwordExists) {
-        return -2;
-    }
-    return 1;
 }

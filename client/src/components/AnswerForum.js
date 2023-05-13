@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Answer from './Answer.js';
 
-export default function AnswerForum( {model, nextState, currentQuestion} ) {
+export default function AnswerForum( {model, nextState, notLoggedIn, currentQuestion} ) {
     const [update, setUpdate] = useState({val: 0, answers: "", question: currentQuestion, numAnswers: 0, page: 1, max: 1, incViews: 1});
     let shown_answers;
     console.log(update["val"], update["page"]);
@@ -55,7 +55,7 @@ export default function AnswerForum( {model, nextState, currentQuestion} ) {
             {update["val"] === 1 && <div className="menu main bottom">
                 {update["answers"]}
                 <div className="abuttoncolumn">
-                    <button id="answerquestion" onClick={() => {
+                    <button id="answerquestion" hidden={notLoggedIn} onClick={() => {
                         nextState(3);
                     }}>Answer Question</button>
                 </div>

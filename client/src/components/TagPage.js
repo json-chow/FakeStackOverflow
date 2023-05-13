@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Tag from "./Tag";
 
-export default function TagPage( {model, setSideColor, setQuery, nextState} ) {
+export default function TagPage( {model, setSideColor, setQuery, nextState, notLoggedIn} ) {
     const [update, setUpdate] = useState({val: 0, tags: [], questions: []})
     if (update["val"] === 0) {
     model.get("http://localhost:8000/tags")
@@ -39,7 +39,7 @@ export default function TagPage( {model, setSideColor, setQuery, nextState} ) {
             <div className="tag top">
                 <p id="numTags">{update["tags"].length ? update["tags"].length : 0} Tags</p>
                 <p id="allTags">All Tags</p>
-                <button id="askquestion" onClick={() => {
+                <button id="askquestion" hidden={notLoggedIn} onClick={() => {
                     setSideColor(-1);
                     nextState(2);
                 }}>

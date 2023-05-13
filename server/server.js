@@ -3,11 +3,17 @@
 // This is where you should start writing server-side code for this application.
 const express = require("express");
 const app = express();
+const bcrypt = require("bcrypt");
+var cookieParser = require("cookie-parser");
+var sessions = require("express-session");
 
 let Account = require('./models/accounts');
 let Answer = require('./models/answers');
 let Question = require('./models/questions');
+let Salt = require('./models/salts');
+let Session = require('./models/sessions');
 let Tag = require('./models/tags');
+let UserProfile = require("./models/users");
 
 const mongoose = require("mongoose");
 const mongoDB = "mongodb://127.0.0.1:27017/fake_so";
@@ -18,6 +24,94 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 var cors = require("cors");
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+
+// parsing the incoming data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+//serving public file
+app.use(express.static(__dirname));
+
+const oneDay = 1000 * 60 * 60 * 24;
+app.use(sessions({
+    secret: "defaultKey",
+    saveUninitialized:true,
+    cookie: { maxAge: oneDay },
+    resave: false 
+}));
+
+app.get('/new_cookie', (req, res) => {
+    console.log(req.sessionID);
+    res.cookie("cookieName",req.sessionID);
+    res.send('cookieSaved');
+});
+
+app.post('/user', async(req,res) => {
+    const account = await Account.find({username: req.body.username});
+    if (!account || account[0] === undefined) {
+        res.send("usrW1");
+    }
+    else {
+        console.log(account);
+        const match = await bcrypt.compare(req.body.password, account[0].password);
+        if (match) {
+            let session = new Session();
+            session=req.session;
+            session._id=req.body.username;
+            session.secret = Math.random().toPrecision(21).toString();
+            await session.save();
+            res.send("accessGranted");
+        }
+        else {
+            res.send("pwdW1");
+        }
+    }
+});
+
+/*
+app.get("/new_session", async (req, res) => {
+    console.log("Body of Request: " + req.body);
+    let foundSession = await Session.find({secret: req.body.secret});
+    console.log(foundSession);
+    if (foundSession) {
+        res.send(foundSession);
+    }
+    res.send(0);
+});
+
+app.post("/new_session", async(req, res) => {
+    let plaintext = req.body.password;
+    console.log("Plaintext: " + plaintext);
+    const ciphertext = await bcrypt.hash(plaintext, salt);
+    console.log("Ciphertext: " + ciphertext);
+    let passwordExists = Account.find({password: ciphertext});
+    if (!passwordExists) {
+        res.send("No cookie for you :( ");
+    }
+    const sessionId = Math.random().toPrecision(21).toString();
+    console.log("Session ID: " + sessionId);
+    res.cookie("name", sessionId, {httpOnly: false});
+    const newSession = new Session({secret: sessionId});
+    console.log("New Session: " + newSession);
+    await newSession.save();
+    res.send("Have a cookie :>) ");
+});
+*/
+
+app.post("/new_account", async(req, res) => {
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    let hashedPassword = await bcrypt.hash(req.body.password, salt);
+    let accountFields = {
+        username: req.body.username,
+        password: hashedPassword,
+        accountName: req.body.accountName
+    }
+    let newAccount = new Account(accountFields);
+    await newAccount.save();
+    res.sendStatus(200);
+});
 
 app.get("/", async (req, res) => {
     let tags, questions, maxPages, numQuestions, accounts;
@@ -71,23 +165,13 @@ app.get("/posts/question/:qid", async (req, res) => {
                         .skip((page - 1) * limit);
     let maxPages = Math.ceil(numAnswers / limit);
     res.send({question, answers, numAnswers, maxPages});
-})
+});
+
 
 app.get("/tags", async(req, res) => {
     let questions = await Question.find({});
     let tags = await Tag.find({});
     res.send({questions, tags});
-});
-
-app.post("/new_account", async(req, res) => {
-    let accountFields = {
-        username: req.body.username,
-        password: req.body.password,
-        accountName: req.body.accountName
-    }
-    let newAccount = new Account(accountFields);
-    await newAccount.save();
-    res.sendStatus(200);
 });
 
 app.post("/new_answer", async(req, res) => {
@@ -113,6 +197,19 @@ app.post("/new_question", async(req, res) => {
     }
     let question = new Question(questionFields);
     await question.save();
+    res.sendStatus(200);
+});
+
+
+app.post("/new_user_profile", async(req, res) => {
+    let profileInfo = {
+        username: req.body.username,
+        password: req.body.password,
+        accountName: req.body.accountName,
+        accountType: req.body.accountType
+    }
+    let newUserProfile = new UserProfile(profileInfo);
+    await newUserProfile.save();
     res.sendStatus(200);
 });
 

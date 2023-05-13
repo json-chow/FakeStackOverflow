@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-export default function PostAnswer( {model, qid, nextState} ) {
+export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
     const [answerText, setAnswerText] = useState("");
     const [answerUsernameText, setAnswerUsernameText] = useState("");
 
@@ -43,7 +43,7 @@ export default function PostAnswer( {model, qid, nextState} ) {
                     Answer error -- answer is empty or some hyperlink is invalid
                 </div>
             </div>
-            <button className="postAnswer" onClick={async () => {
+            <button className="postAnswer" hidden={notLoggedIn} onClick={async () => {
                 if (detectBadHyperlink()) {
                     document.getElementById("ahyperlinkError").hidden = false;
                 } else {

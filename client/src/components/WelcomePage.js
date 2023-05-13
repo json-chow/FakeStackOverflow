@@ -1,6 +1,5 @@
-import { useState } from "react";
-
-export default function WelcomePage( {model, nextState} ) {
+export default function WelcomePage( {nextState} ) {
+    
     return (
         <div className="menu main">
             <h2>Welcome to the greatest webthingy of all time.</h2>
@@ -15,7 +14,7 @@ export default function WelcomePage( {model, nextState} ) {
                 Returning User
             </button>
             <button id="guest" onClick={() => {
-                nextState(8);
+                nextState(0);
             }}>
                 Continue as Guest
             </button>

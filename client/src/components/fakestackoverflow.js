@@ -9,7 +9,7 @@ import PostAnswer from './PostAnswer.js';
 import WelcomePage from './WelcomePage.js';
 import CreateAccountPage from './CreateAccountPage.js';
 import LoginPage from './LoginPage.js';
-import Guest from './Guest.js';
+import LogoutBtn from './LogoutButton.js';
 
 // var model = new Model();
 const axios = require("axios");
@@ -17,29 +17,9 @@ const axios = require("axios");
 export default function FakeStackOverflow() {
     const [query, setQuery] = useState({nontags: [], tags: [], sortBy: undefined});
     const [sideColor, setSideColor] = useState(0);
-
+    const [notLoggedIn, setUserState] = useState(1);
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [userState, setUserState] = useState(0);
-    
-        <div className="menu main">
-            <h2>Welcome to the greatest webthingy of all time.</h2>
-            <button id="register" onClick={() => {
-                setUserState("Registered");
-            }}>
-                Register
-            </button>
-            <button id="login" onClick={() => {
-                setUserState(7);
-            }}>
-                Returning User
-            </button>
-            <button id="guest" onClick={() => {
-                setUserState(8);
-            }}>
-                Continue as Guest
-            </button>
-        </div>
 
     return (
         <>
@@ -50,35 +30,41 @@ export default function FakeStackOverflow() {
                     setSideColor={setSideColor}
                     setQuery={setQuery}
                     nextState={setShowState}/>}
-
+                {([0, 1, 2, 3, 4].includes(showState) && notLoggedIn === 0) && 
+                    <LogoutBtn nextState = {setShowState}
+                    userState={setUserState}/>}
                 {showState === 0 && 
                     <QuestionForum model={axios}
-                        userState={userState}
                         query={query}
                         setQuery={setQuery}
                         setSideColor={setSideColor}
                         nextState={setShowState}
+                        notLoggedIn={notLoggedIn}
                         setCurrentQuestion={setCurrentQuestion}/>
                     }
                 {showState === 1 && 
                     <AnswerForum model={axios}
                         currentQuestion={currentQuestion}
-                        nextState={setShowState}/>
+                        nextState={setShowState}
+                        notLoggedIn={notLoggedIn}/>
                     }
                 {showState === 2 &&
                     <AskQuestion model={axios}
                         setSideColor={setSideColor}
-                        nextState={setShowState}/>
+                        nextState={setShowState}
+                        notLoggedIn={notLoggedIn}/>
                     }
                 {showState === 3 && 
                     <PostAnswer model={axios}
                         qid={currentQuestion._id}
-                        nextState={setShowState}/>}
+                        nextState={setShowState}
+                        notLoggedIn={notLoggedIn}/>}
                 {showState === 4 && 
                     <TagPage model={axios}
                         setSideColor={setSideColor}
                         setQuery={setQuery}
-                        nextState={setShowState}/>}
+                        nextState={setShowState}
+                        notLoggedIn={notLoggedIn}/>}
                 {showState === 5 &&
                     <WelcomePage model={axios}
                         nextState={setShowState}/>}
@@ -87,10 +73,8 @@ export default function FakeStackOverflow() {
                         nextState={setShowState}/>}
                 {showState === 7 &&
                     <LoginPage model={axios}
-                        nextState={setShowState}/>}
-                {showState === 8 &&
-                    <Guest model={axios}
-                        nextState={setShowState}/>}
+                        nextState={setShowState}
+                        userState={setUserState}/>}
             </div>
         </>
     );

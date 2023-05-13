@@ -8,3 +8,12 @@ Add design docs in *images/*
 ## Team Member 1 Contribution
 
 ## Team Member 2 Contribution
+TODO_list:
+    Already completed cases 1 and 2
+    1. Logout => Done, except for possible system crash case
+    2. Guest => Just need to add exception
+    3. Add in regex for email => Added, needs testing
+    4. Registered user profile => Started
+    5. Admin user profile => Started
+    6. UML Diagram?
+    7. bcrypt

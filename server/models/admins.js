@@ -1,9 +1,12 @@
-// Account Document Schema
+// Admin Profile Document Schema
+
+// This will be used for our server.init.js script (bottom of project specs page)
+
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const accountSchema = new Schema({
+const adminProfileSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -21,8 +24,8 @@ const accountSchema = new Schema({
     }
 });
 
-accountSchema.virtual("url").get(function() {
-    return "posts/account/" + this._id;
+adminProfileSchema.virtual("url").get(function() {
+    return "posts/admin/" + this._id;
 });
 
-module.exports = mongoose.model("Account", accountSchema);
+module.exports = mongoose.model("Admin", adminProfileSchema);

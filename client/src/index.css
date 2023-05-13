@@ -601,7 +601,7 @@ CSS tags for 'Question Post' section:
 }
 
 
-.usrTxt, .newUsernameText, .newPasswordText, .newAccountNameText {
+.usrTxt, .newUsernameText, .newPasswordText, .newPasswordVerifiedText, .newAccountNameText {
     width: 500px;
     height: 40px;
     columns: 50;
@@ -643,6 +643,19 @@ CSS tags for 'Question Post' section:
     padding-bottom: 10px;
 }
 
-.newUsernameText:invalid, .newPasswordText:invalid, .newAccountNameText:invalid {
+.newUsernameText:invalid, .newPasswordText:invalid, .newAccountNameText:invalid, .newPasswordVerifiedText:invalid {
     border: 2px solid red;
+}
+
+#usrW0, #usrW1, #usrW2, #pwdW0, #pwdW1, #pwdW2, #pwdW3, #pwdW4, #emailW0, #emailW1, #emailW2 {
+    color:red;
+}
+
+#logoutBtn {
+    color: black;
+    background-color: rgb(183, 52, 5);
+    margin-left: 78.99%;
+    padding: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }

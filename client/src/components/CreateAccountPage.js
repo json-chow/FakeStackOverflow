@@ -4,6 +4,7 @@ export default function CreateAccountPage( {model, nextState} ) {
 
     const [newUsernameText, setNewUsernameText] = useState("");
     const [newPasswordText, setNewPasswordText] = useState("");
+    const [newPasswordVerifiedText, setNewPasswordVerifiedText] = useState("");
     const [newAccountNameText, setNewAccountNameText] = useState("");
     
     const [update, setUpdate] = useState({val: 0, accounts: []});
@@ -24,146 +25,137 @@ export default function CreateAccountPage( {model, nextState} ) {
                     value={newUsernameText}
                     onChange={(e) => {
                         setNewUsernameText(e.target.value);
-                        displayInvalidInput(e);
                     }}>
                 </input>
-                <p id="usernameNotEntered" className="usrW0" hidden={true}>
-                    Please enter a valid username -- username must not be empty.
-                </p>
-                <p id="usernameInUse" className="usrW1" hidden={true}>
+                <div id="usrW0" hidden={true}>
+                    Please enter a valid username -- username field cannot be empty.
+                </div>
+                <div id="usrW1" hidden={true}>
                     An account already exists with this username. Please enter a different username.
-                </p>
+                </div>
                 <h3>Please enter your preferred password:</h3>
                 <input className="newPasswordText"
                     value={newPasswordText}
-                    //pattern="*(!(\n))@gmail.com"
                     onChange={(e) => {
                         setNewPasswordText(e.target.value);
-                        displayInvalidInput(e);
                     }}>
                 </input>
-                <p id="passwordNotEntered" className="pwdW0" hidden={true}>
-                    Please enter a valid password -- password cannot contain the entered username or email address.
-                </p>
-                <p id="passwordContainsUsername" className="pwdW1" hidden={true}>
+                <div id="pwdW0" hidden={true}>
+                Please enter a valid password -- password field cannot be empty.
+                </div>
+                <div id="pwdW1" hidden={true}>
                     Please enter a valid password -- password cannot contain username.
-                </p>
-                <p id="passwordContainsEmail" className="pwdW2" hidden={true}>
-                    Please enter a valid password -- password cannot contain username.
-                </p>
+                </div>
+                <div id="pwdW2" hidden={true}>
+                    Please enter a valid password -- password cannot contain email.
+                </div>
+                <div id="pwdW3" hidden={true}>
+                    Passwords do not match.
+                </div>
+                <h3>Please re-enter your password:</h3>
+                <input className="newPasswordVerifiedText"
+                value={newPasswordVerifiedText}
+                onChange={(e) => {
+                    setNewPasswordVerifiedText(e.target.value);
+                }}>
+                </input>
+                <div id="pwdW4" hidden={true}>
+                    Passwords do not match.
+                </div>
                 <h3>Please enter an account name:</h3>
                 <input className="newAccountNameText"
                 value={newAccountNameText}
+                pattern="[\w.!#$%&'*+-/=?^`{|}~]+@[A-Za-z0-9]+?[A-Za-z0-9.]*?.[A-Za-z]+"
                 onChange={(e) => {
                     setNewAccountNameText(e.target.value);
-                    displayInvalidInput(e);
                 }}>
                 </input>
-                <p id="accountNameNotEntered" className="emailW0" hidden={true}>
-                    Please enter a valid email address.
-                </p>
-                <p id="emailNotValid" className="emailW1" hidden={true}>
-                    Please enter a valid email address.
-                </p>
-                <p id="emailInUse" className="emailW2" hidden={true}>
-                    Please enter a valid email address.
-                </p>
+                <div id="emailW0" hidden={true}>
+                    Please enter a valid email address -- email field cannot be empty.
+                </div>
+                <div id="emailW1" hidden={true}>
+                    Incorrect format for email address. Please enter a valid address.
+                </div>
+                <div id="emailW2" hidden={true}>
+                    Account already registered under this email. Please enter a different email address.
+                </div>
             </div>
             <button className="createAccountBtn" onClick={async () => { // BUTTON IS PRESSED, ACCOUNT IS SAVED, THEN DIRECT USER TO LOGIN
-                let result = await processAccountInfo(model, accounts, {
+                document.getElementById("usrW0").hidden = true;
+                document.getElementById("usrW1").hidden = true;
+                document.getElementById("pwdW0").hidden = true;
+                document.getElementById("pwdW1").hidden = true;
+                document.getElementById("pwdW2").hidden = true;
+                document.getElementById("emailW0").hidden = true;
+                document.getElementById("emailW1").hidden = true;
+                document.getElementById("emailW2").hidden = true;
+                let patternMismatch = document.getElementsByClassName("newAccountNameText")[0].validity.patternMismatch;
+                console.log(patternMismatch);
+                let result = await processAccountInfo(model, patternMismatch, accounts, {
                     username: newUsernameText,
                     password: newPasswordText,
+                    passwordV: newPasswordVerifiedText,
                     accountName: newAccountNameText
                 });
-                if (result === 1) {
-                    console.log(1 + " Success");
+                if (result === 1) { // credentials are valid, taking user to login page
                     nextState(7);
                 }
-                else if (result === 0) {
-                    console.log(0);
-                }
-                else if (result === -1) {
-                    console.log(-1);
-                }
-                else if (result === -2) {
-                    console.log(-2);
-                }
-                else if (result === -3) {
-                    console.log(-3);
-                }
-                else if (result === -4) {
-                    console.log(-4);
-                }
-                else {
-                    console.log("Failure");
-                }
             }}>Create Account</button>
+            <p className="mandatoryFieldsWarning">* indicates incorrect input for fields</p>
         </div>
     )
 }
 
 
-function displayInvalidInput(e) {
-    var cName = e.target.className;
-    if (e.target.validity.patternMismatch) {
-        if (cName === "usrW0") {
-            document.getElementById("usernameNotEntered").hidden = false;
-        } else if (cName === "usrW1") {
-            document.getElementById("usernameInUse").hidden = false;
-        } else if (cName === "pwdW0") {
-            document.getElementById("passwordNotEntered").hidden = false;
-        } else if (cName === "pwdW1") {
-            document.getElementById("passwordContainsUsername").hidden = false;
-        } else if (cName === "pwdW2") {
-            document.getElementById("passwordContainsEmail").hidden = false;
-        } else if (cName === "emailW0") {
-            document.getElementById("accountNameNotEntered").hidden = false;
-        } else if (cName === "emailW1") {
-            document.getElementById("emailNotValid").hidden = false;
-        } else if (cName === "emailW2") {
-            document.getElementById("emailInUse").hidden = false;
-        }
-    }
-}
-
-
-async function processAccountInfo(model, accounts, accInfo) {
+async function processAccountInfo(model, patternMismatch, accounts, accInfo) {
     let newUsername = accInfo.username;
     let newPassword = accInfo.password;
+    let newPasswordVerified = accInfo.passwordV;
     let newAccountName = accInfo.accountName;
+    let errors = [];
     if (newUsername === undefined || newUsername.trim().length <= 0) {
-        document.getElementsByClassName("usrW0").hidden = false;
-        return 0;
+        document.getElementById("usrW0").hidden = false;
+        errors.push(-5);
     }
     if (newPassword === undefined || newPassword.trim().length <= 0) {
-        document.getElementsByClassName("pwdW0").hidden = false;
-        return 0;
+        document.getElementById("pwdW0").hidden = false;
+        errors.push(-6);
     }
     if (newAccountName === undefined || newAccountName.trim().length <= 0) {
-        document.getElementsByClassName("emailW0").hidden = false;
-        return 0;
+        document.getElementById("emailW0").hidden = false;
+        errors.push(-7);
     }
-    let patternMismatch = 0;
     if (patternMismatch) {
-        document.getElementsByClassName("emailW1").hidden = false;
+        document.getElementById("emailW1").hidden = false;
+        errors.push(-8);
     }
     if (accounts.find(({accountName}) => accountName === newAccountName)) {
-        document.getElementsByClassName("emailW2").hidden = false;
-        return -1;
+        document.getElementById("emailW2").hidden = false;
+        errors.push(-1);
     }
     if (accounts.find(({username}) => username === newUsername)) {
-        document.getElementsByClassName("usrW1").hidden = false;
-        return -2;
+        document.getElementById("usrW1").hidden = false;
+        errors.push(-2);;
     }
-    if (newPassword.includes(newUsername)) {
-        document.getElementsByClassName("pwd1").hidden = false;
-        return -3;
+    if (newPassword.includes(newUsername) && newUsername.length !== 0) {
+        document.getElementById("pwdW1").hidden = false;
+        errors.push(-3);;
     }
-    if (newPassword.includes(newAccountName)) {
-        document.getElementsByClassName("pwd1").hidden = false;
-        return -4;
+    if (newPassword.includes(newAccountName) && newAccountName.length !== 0) {
+        document.getElementById("pwdW2").hidden = false;
+        errors.push(-4);
     }
-    await model.post("http://localhost:8000/new_account", accInfo)
+    if (newPassword !== newPasswordVerified) {
+        document.getElementById("pwdW3").hidden = false;
+        document.getElementById("pwdW4").hidden = false;
+        errors.push(-9);
+    }
+    if (errors.length !== 0) {
+        return 0;
+    }
+    else {
+        await model.post("http://localhost:8000/new_account", accInfo)
         .then(console.log("good"));
         return 1;
+    }
 };

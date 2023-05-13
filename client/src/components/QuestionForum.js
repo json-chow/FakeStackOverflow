@@ -3,8 +3,8 @@ import { useState } from "react";
 
 var prevQuery = {tags: [], nontags: [], sortBy: undefined};
 
-export default function QuestionForum( {model, userState, query, setQuery, setSideColor, nextState, setCurrentQuestion} ) {
-    const [update, setUpdate] = useState({val: 0, questions: [], tags: [], numQuestions: 0})
+export default function QuestionForum( {model, query, setQuery, setSideColor, nextState, notLoggedIn, setCurrentQuestion} ) {
+    const [update, setUpdate] = useState({val: 0, questions: [], tags: [], numQuestions: 0});
     const [page, setPage] = useState({page: 1, max: 1});
     if (update["val"] === 0 || page["update"] === 1) {
         model.get("http://localhost:8000/", {
@@ -20,10 +20,6 @@ export default function QuestionForum( {model, userState, query, setQuery, setSi
                 setUpdate({val: 1, questions: res.data["questions"], tags: res.data["tags"], numQuestions: res.data["questions"].pop()})
                 setPage({page: page["page"], max: parseInt(res.data["maxPages"])});
             })
-    }
-    let showButton = false;
-    if (userState === 'n' || userState === 'r') {
-        showButton = true;
     }
     let questions = update["questions"];
     let tags = update["tags"];
@@ -62,7 +58,7 @@ export default function QuestionForum( {model, userState, query, setQuery, setSi
             {update["val"] === 1 && <div className="menu main top">
                 <div>
                     <h2>All Questions</h2>
-                    <button id="askquestion" hidden={showButton} onClick={() => {
+                    <button id="askquestion" hidden={notLoggedIn} onClick={() => {
                         setSideColor(-1);
                         nextState(2);
                     }}>

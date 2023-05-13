@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 
-export default function AskQuestion( {model, setSideColor, nextState} ) {
+export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn} ) {
     const [titleText, setTitleText] = useState("");
     const [questionText, setQuestionText] = useState("");
     const [usernameText, setUsernameText] = useState("");
@@ -75,7 +75,7 @@ export default function AskQuestion( {model, setSideColor, nextState} ) {
                     Please enter a valid username -- username must not be empty.
                 </div>
             </div>
-            <button className="postQuestion" onClick={async () => {
+            <button className="postQuestion" hidden={notLoggedIn} onClick={async () => {
                 if (detectBadHyperlink()) {
                     document.getElementById("hyperlinkError").hidden = false;
                 } else {

@@ -9,7 +9,6 @@ export default function Sidebar( {sideColor, setSideColor, setQuery, setSortBy, 
                         setSideColor(0);
                         nextState(0);
                         setQuery({nontags:[], tags:[]});
-                        setSortBy();
                     }}>
                     Questions
                 </button>
