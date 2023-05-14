@@ -1,10 +1,17 @@
-export default function WelcomePage( {model, cookie, changeUserState, nextState} ) {
+export default function WelcomePage( {model, cookie, firstTimer, setUserState, nextState} ) {
     console.log("Cookie: " + cookie["val"]);
     model.get("http://localhost:8000/homepage", {withCredentials: true}).then((res) => {
-        console.log(res.data);
-        if (res.data === "sessionFound") {
-            changeUserState(0);
+        //console.log("\n\n\nres.data: " + res.data + "\n\n\n");
+        if (res.data === "sessionFound") { // session is stored, brings user straight to homepage
+            setUserState(0);
             nextState(0);
+        }
+        else if (res.data === "sessionNotFound") { // session was deleted from database after logout
+            nextState(5);
+        }
+        else { // all other cases will logout user
+            setUserState(1);
+            nextState(5);
         }
     });
     return (
@@ -25,6 +32,18 @@ export default function WelcomePage( {model, cookie, changeUserState, nextState}
             }}>
                 Continue as Guest
             </button>
+
+            <div>
+                <p id="logoutSuccessful" hidden={true}>
+                    Successfully logged out. Thanks for visiting our site!
+                </p>
+                <p id="sessionNotFound" hidden={true}>
+                    Session removed from database while retrieving homepage. Please click on "Returning User" and login to your account.
+                </p>
+                <p id="unknownErrorOccurred" hidden={true}>
+                    An unexpected error occurred during your previous session. Please click on "Returning User" and login to your account.
+                </p>
+            </div>
         </div>
     )
 }

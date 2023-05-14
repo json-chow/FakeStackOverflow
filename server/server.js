@@ -13,7 +13,6 @@ let Question = require('./models/questions');
 let Session = require('./models/sessions');
 let Tag = require('./models/tags');
 let Comment = require('./models/comments');
-let UserProfile = require("./models/users");
 
 const mongoose = require("mongoose");
 const mongoDB = "mongodb://127.0.0.1:27017/fake_so";
@@ -49,18 +48,30 @@ app.use(sessions({
     resave: false 
 }));
 
-app.get('/homepage', (req, res) => {
-    if (req.session.user === undefined) {
-        res.send("youGaveMeNoCookie");
-    } else {
-        res.send("sessionFound")
+app.get('/homepage', async(req, res) => {
+    let session = await Session.findOne({id: req.session.user});
+    if (session) {
+        res.send("sessionFound");
+    }
+    else {
+        res.send("sessionNotFound");
     }
 });
 
-app.post('/logout', (req,res) => {
-    req.session.destroy(() => {
-        res.send("Could not log out. Please exit application and reconnect.");
-    });
+app.post('/logout', async(req,res) => {
+    console.log("req.session.user: " + req.session.user);
+    let sessions = await Session.find({});
+    console.log("Sessions List: " + sessions);
+    let x = await Session.findOne({id: req.session.user});
+    console.log("Located Session: " + x);
+    let deletedSession = await Session.deleteOne({id: req.session.user});
+    if (deletedSession) {
+        req.session.destroy();
+        res.send("Session ended with no errors.");
+    }
+    else {
+        res.send("sessionDisrupted");
+    }
 });
 
 app.post('/user', async(req,res) => {
@@ -102,7 +113,6 @@ app.post("/new_account", async(req, res) => {
 });
 
 app.get("/", async (req, res) => {
-    console.log("session: ", req.session.user);
     let tags, questions, maxPages, numQuestions, accounts;
     let limit = 5
     let page = parseInt(req.query.page);
@@ -258,19 +268,6 @@ app.post("/new_question", async(req, res) => {
     }
     let question = new Question(questionFields);
     await question.save();
-    res.sendStatus(200);
-});
-
-
-app.post("/new_user_profile", async(req, res) => {
-    let profileInfo = {
-        username: req.body.username,
-        password: req.body.password,
-        accountName: req.body.accountName,
-        accountType: req.body.accountType
-    }
-    let newUserProfile = new UserProfile(profileInfo);
-    await newUserProfile.save();
     res.sendStatus(200);
 });
 
