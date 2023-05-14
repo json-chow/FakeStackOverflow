@@ -22,7 +22,13 @@ let db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 var cors = require("cors");
-app.use(cors());
+
+const corsOptions = {
+    origin: "http://localhost:3000",
+    credentials: true
+}
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -38,23 +44,16 @@ app.use(sessions({
     secret: "defaultKey",
     saveUninitialized:true,
     cookie: { 
-        httpOnly: false, 
-        maxAge: oneHour 
+        maxAge: oneHour,
     },
     resave: false 
 }));
 
 app.get('/homepage', (req, res) => {
-    console.log("req.cookies: " + req.cookies[req.body.username]);
-    console.log("req.sessionID: " + req.cookies.sessionID);
-    if (req.cookies[req.body.username] === undefined) {
+    if (req.session.user === undefined) {
         res.send("youGaveMeNoCookie");
-    }
-    if (req.cookies.sessionID === req.cookies.sessionID) {
-        res.send('sessionFound');
-    }
-    else {
-        res.send('noSessionFound');
+    } else {
+        res.send("sessionFound")
     }
 });
 
@@ -68,12 +67,12 @@ app.post('/user', async(req,res) => {
         const match = await bcrypt.compare(req.body.password, account[0].password);
         if (match) {
             let sessionInfo=req.session;
-            sessionInfo._id=req.body.username;
+            sessionInfo.user=req.body.username;
             sessionInfo.secret = Math.random().toPrecision(21).toString();
-            res.cookie(req.body.username, sessionInfo.secret, {httpOnly: false});
-            console.log();
-            let dbSession = new Session({id: sessionInfo._id, secret: sessionInfo.secret})
+            // res.cookie(req.body.username, sessionInfo.secret, {httpOnly: false});
+            let dbSession = new Session({id: sessionInfo.user, secret: sessionInfo.secret})
             await dbSession.save();
+            console.log(sessionInfo);
             res.send("accessGranted");
         }
         else {
@@ -97,6 +96,7 @@ app.post("/new_account", async(req, res) => {
 });
 
 app.get("/", async (req, res) => {
+    console.log("session: ", req.session.user);
     let tags, questions, maxPages, numQuestions, accounts;
     let limit = 5
     let page = parseInt(req.query.page);

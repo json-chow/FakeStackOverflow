@@ -1,12 +1,11 @@
 export default function WelcomePage( {model, cookie, nextState} ) {
     console.log("Cookie: " + cookie["val"]);
-    if (cookie.val !== "") {
-        let reqSession = model.get("http://localhost:8000/homepage", {cookie});
-        console.log(reqSession);
-        if (reqSession === "sessionFound") {
-            nextState(7);
+    model.get("http://localhost:8000/homepage", {withCredentials: true}).then((res) => {
+        console.log(res.data);
+        if (res.data === "sessionFound") {
+            nextState(0);
         }
-    }
+    });
     return (
         <div className="menu main">
             <h2>Welcome to the greatest webthingy of all time.</h2>

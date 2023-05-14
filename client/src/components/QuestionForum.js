@@ -11,8 +11,9 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
                 tags: query.tags,
                 nontags: query.nontags,
                 sortBy: query.sortBy,
-                page: update["page"],
-            }
+                page: update["page"]
+            },
+            withCredentials: true
         })
             .then((res) => {
                 setUpdate({val: 1,
@@ -36,8 +37,9 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
                 tags: query.tags,
                 nontags: query.nontags,
                 sortBy: query.sortBy,
-                page: 1,
+                page: 1
             },
+            withCredentials: true
         })
             .then((res) => {
                 setQuery({...query, reset: undefined})

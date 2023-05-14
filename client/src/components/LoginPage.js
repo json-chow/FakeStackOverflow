@@ -55,7 +55,7 @@ export default function LoginPage( {model, userState, nextState, setCookie} ) {
                     document.getElementById("pwdW0").hidden = false;
                 }
                 if (flag) {
-                    const serverResponse = await model.post("http://localhost:8000/user", {username,password});
+                    const serverResponse = await model.post("http://localhost:8000/user", {username,password}, {withCredentials: true});
                     console.log("serverResponse.data: " + serverResponse.data);
                     if (serverResponse.data === "accessGranted") {
                         console.log("serverResponse.cookies: \n" + serverResponse.cookies);
