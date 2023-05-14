@@ -55,16 +55,16 @@ export default function LoginPage( {model, userState, nextState} ) {
                     document.getElementById("pwdW0").hidden = false;
                 }
                 if (flag) {
-                    const userSession = await model.post("http://localhost:8000/user", {username,password});
-                    console.log("userSession.data: " + userSession.data);
-                    if (userSession.data === "accessGranted") {
+                    const serverResponse = await model.post("http://localhost:8000/user", {username,password});
+                    console.log("serverResponse.data: " + serverResponse.data);
+                    if (serverResponse.data === "accessGranted") {
                         const cookie = await model.get("http://localhost:8000/new_cookie");
                         console.log("COOKIE: \n" + cookie.val);
                         userState(0);
                         nextState(0);
                     }
                     else {
-                        document.getElementById(userSession.data).hidden = false;
+                        document.getElementById(serverResponse.data).hidden = false;
                     }
                 }
             }}>Login</button>

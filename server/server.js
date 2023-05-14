@@ -41,6 +41,12 @@ app.use(sessions({
     resave: false 
 }));
 
+app.get('/new_session', (req, res) => {
+    console.log(req.sessionID);
+    res.cookie("sessionRetrieved",req.sessionID);
+    res.send('sessionRetrieved');
+});
+
 app.get('/new_cookie', (req, res) => {
     console.log(req.sessionID);
     res.cookie("cookieName",req.sessionID);

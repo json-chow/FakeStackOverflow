@@ -1,5 +1,4 @@
 export default function WelcomePage( {nextState} ) {
-    
     return (
         <div className="menu main">
             <h2>Welcome to the greatest webthingy of all time.</h2>

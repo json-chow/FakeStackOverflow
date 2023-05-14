@@ -1,5 +1,4 @@
-
-const { Int32, Double } = require("mongodb");
+// Session Document Schema
 const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
