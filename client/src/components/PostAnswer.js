@@ -3,25 +3,9 @@ import { useState } from "react";
 
 export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
     const [answerText, setAnswerText] = useState("");
-    const [answerUsernameText, setAnswerUsernameText] = useState("");
 
     return (
         <div className="menu main">
-            <div>
-                <p className="answerUsernameHeader">Username*</p>
-                <input className="answerUsernameText"
-                    pattern="(\s*\S+\s*)+"
-                    value={answerUsernameText}
-                    onChange={(e) => {
-                        setAnswerUsernameText(e.target.value);
-                        document.getElementById("aUserError").hidden = true;
-                        displayInvalidAInput(e);
-                    }}>
-                </input>
-                <div id="aUserError" className="aError" hidden={true}>
-                    Username not long enough, must be at least 1 character (excluding whitespace).
-                </div>
-            </div>
             <div>
                 <p className="answerSectionHeader">Answer Text*</p>
                 <textarea id="answerTextId"
@@ -47,15 +31,11 @@ export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
                 if (detectBadHyperlink()) {
                     document.getElementById("ahyperlinkError").hidden = false;
                 } else {
-                    let result = await processAnswerPost(
-                        model,
-                        {
-                        text: answerText,
-                        ansBy : answerUsernameText,
-                        ansDate : new Date()
-                    }, qid);
-                    if (result) {
+                    let result = await processAnswerPost(model, {text: answerText, ansDate : new Date()}, qid);
+                    if (result === 1) {
                         nextState(1);
+                    } else if (result === 2) {
+                        nextState(5);
                     }
                 }
             }}>Post Answer</button>
@@ -66,11 +46,6 @@ export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
 
 function displayInvalidAInput(e) {
     var cName = e.target.className;
-    if (e.target.validity.patternMismatch) {
-        if (cName === "answerUsernameText") {
-            document.getElementById("aUserError").hidden = false;
-        } 
-    }
     if (cName === "answerText") {
         var re = /(\s*\S+\s*)+/g;
         if (!document.getElementById(e.target.id).value.match(re)) {
@@ -95,24 +70,19 @@ function detectBadHyperlink() {
 }
 
 async function processAnswerPost(model, candidateAnswer, qid) {
-    var ansUserMismatch = document.getElementsByClassName("answerUsernameText")[0].validity.patternMismatch;
     var ansMismatch = document.getElementsByClassName("answerText")[0].validity.patternMismatch;
-    var mismatch = ansUserMismatch || ansMismatch;
-    if (ansUserMismatch || candidateAnswer.ansBy === "") {
-      document.getElementById("aUserError").hidden = false;
-    }
     if (!document.getElementById("answerTextId").value.match(/(\s*\S+\s*)+/g) || candidateAnswer.text === undefined) {
       document.getElementById("answerError").hidden = false;
     }
     
-    if (candidateAnswer.ansBy !== undefined &&
-        candidateAnswer.text !== undefined &&
-        candidateAnswer.ansBy.trim().length > 0 &&
-        candidateAnswer.text.trim().length > 0 &&
-        !mismatch){
-        await model.post("http://localhost:8000/new_answer", {candidateAnswer, qid: qid})
-      return 1;
+    if (candidateAnswer.text !== undefined && candidateAnswer.text.trim().length > 0 && !ansMismatch){
+        try {
+            await model.post("http://localhost:8000/new_answer", {candidateAnswer, qid: qid}, {withCredentials: true})
+            return 1;
+        } catch (e) {
+            return 2;
+        }
     } else {
-      return 0;
+        return 0;
     }
 }

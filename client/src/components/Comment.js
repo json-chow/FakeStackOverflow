@@ -1,10 +1,10 @@
 import Vote from "./Vote";
 
-export default function Comment( {model, comment} ){
+export default function Comment( {model, comment, nextState} ){
     return (
         <div className="cmnt">
             <div className="cmnt left">
-                <Vote model={model} cid={comment._id}/>
+                <Vote model={model} cid={comment._id} nextState={nextState}/>
             </div>
             <div className="cmnt right">
                 {replaceHyperlinks(comment.text)}

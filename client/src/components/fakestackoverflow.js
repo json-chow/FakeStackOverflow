@@ -21,7 +21,6 @@ export default function FakeStackOverflow() {
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [cookieState, setCookie] = useState({name: "", val: ""});
-
     return (
         <>
             <Header nextState={setShowState} userState={setUserState} notLoggedIn={notLoggedIn} onQueryChange={setQuery} showState={showState}/>

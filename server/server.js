@@ -48,6 +48,15 @@ app.use(sessions({
     resave: false 
 }));
 
+function isSignedIn(req, res, next) {
+    if (req.session.user) {
+        next();
+    } else {
+        console.log("401: Session Not Found")
+        res.sendStatus(401);
+    }
+}
+
 app.get('/homepage', async(req, res) => {
     let session = await Session.findOne({id: req.session.user});
     if (session) {
@@ -184,10 +193,10 @@ app.get("/posts/answer/:aid/comments", async (req, res) => {
     res.send({comments, maxPages})
 })
 
-app.post("/posts/question/:qid/comments", async (req, res) => {
+app.post("/posts/question/:qid/comments", isSignedIn, async (req, res) => {
     let cmntFields = {
         text: req.body.text,
-        cmnt_by: req.body.cmnt_by,
+        cmnt_by: req.session.user,
         cmnt_date_time: req.body.cmnt_date_time
     };
     let newComment = new Comment(cmntFields);
@@ -196,10 +205,10 @@ app.post("/posts/question/:qid/comments", async (req, res) => {
     res.sendStatus(200);
 })
 
-app.post("/posts/answer/:aid/comments", async (req, res) => {
+app.post("/posts/answer/:aid/comments", isSignedIn, async (req, res) => {
     let cmntFields = {
         text: req.body.text,
-        cmnt_by: req.body.cmnt_by,
+        cmnt_by: req.session.user,
         cmnt_date_time: req.body.cmnt_date_time
     };
     let newComment = new Comment(cmntFields);
@@ -210,31 +219,131 @@ app.post("/posts/answer/:aid/comments", async (req, res) => {
 
 app.get("/posts/question/:qid/votes", async (req, res) => {
     let question = await Question.findById(req.params.qid);
-    res.send({votes: question.votes})
+    let account = await Account.findOne({username: req.session.user});
+    let vote = 0;
+    if (account) {
+        if (account.questionUpvotes && account.questionUpvotes.includes(req.params.qid)) {
+            vote = 1;
+        } else if (account.questionDownvotes && account.questionDownvotes.includes(req.params.qid)) {
+            vote = -1
+        }
+    } else {
+        vote = undefined;
+    }
+    res.send({votes: question.votes, vote: vote})
 })
 
 app.get("/posts/answer/:aid/votes", async (req, res) => {
     let answer = await Answer.findById(req.params.aid);
-    res.send({votes: answer.votes})
+    let account = await Account.findOne({username: req.session.user});
+    let vote = 0;
+    if (account) {
+        if (account.answerUpvotes && account.answerUpvotes.includes(req.params.aid)) {
+            vote = 1;
+        } else if (account.answerDownvotes && account.answerDownvotes.includes(req.params.aid)) {
+            vote = -1
+        }
+    }
+    res.send({votes: answer.votes, vote: vote})
 })
 
 app.get("/comments/:cid/votes", async (req, res) => {
     let comment = await Comment.findById(req.params.cid);
-    res.send({votes: comment.votes})
+    let account = await Account.findOne({username: req.session.user});
+    let vote = 0;
+    if (account && account.commentUpvotes && account.commentUpvotes.includes(req.params.cid)) {
+        vote = 1;
+    }
+    res.send({votes: comment.votes, vote: vote})
 })
 
-app.post("/posts/question/:qid/votes/:amt", async (req, res) => {
-    let question = await Question.findByIdAndUpdate(req.params.qid, {$inc: {votes: parseInt(req.params.amt)}});
+app.post("/posts/question/:qid/votes/:amt", isSignedIn, async (req, res) => {
+    let voteAmt = parseInt(req.params.amt);
+    let qid = req.params.qid;
+    let account = await Account.findOne({username: req.session.user});
+    let question;
+    if (voteAmt == 1) { // Upvote case
+        if (account.questionUpvotes && account.questionUpvotes.includes(qid)) {
+            // Revert previous upvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -1}});
+            await Account.findByIdAndUpdate(account._id, {$pull: {questionUpvotes: qid}})
+        } else if (account.questionDownvotes && account.questionDownvotes.includes(qid)){
+            // Change from downvote to upvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 2}})
+            await Account.findByIdAndUpdate(account._id, {$pull: {questionDownvotes: qid}, $push: {questionUpvotes: qid}})
+        } else {
+            // No previous upvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 1}})
+            await Account.findByIdAndUpdate(account._id, {$push: {questionUpvotes: qid}})
+        }
+    } else { // Downvote case
+        if (account.questionDownvotes && account.questionDownvotes.includes(qid)) {
+            // Revert previous downvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 1}});
+            await Account.findByIdAndUpdate(account._id, {$pull: {questionDownvotes: qid}})
+        } else if (account.questionUpvotes && account.questionUpvotes.includes(qid)){
+            // Change from upvote to downvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -2}})
+            await Account.findByIdAndUpdate(account._id, {$pull: {questionUpvotes: qid}, $push: {questionDownvotes: qid}})
+        } else {
+            // No previous downvote
+            question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -1}})
+            await Account.findByIdAndUpdate(account._id, {$push: {questionDownvotes: qid}})
+        }
+    }
     res.send({votes: question.votes})
 })
 
-app.post("/posts/answer/:aid/votes/:amt", async (req, res) => {
-    let answer = await Answer.findByIdAndUpdate(req.params.aid, {$inc: {votes: parseInt(req.params.amt)}});
+app.post("/posts/answer/:aid/votes/:amt", isSignedIn, async (req, res) => {
+    let voteAmt = parseInt(req.params.amt);
+    let aid = req.params.aid;
+    let account = await Account.findOne({username: req.session.user});
+    let answer;
+    if (voteAmt == 1) { // Upvote case
+        if (account.answerUpvotes && account.answerUpvotes.includes(aid)) {
+            // Revert previous upvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -1}});
+            await Account.findByIdAndUpdate(account._id, {$pull: {answerUpvotes: aid}})
+        } else if (account.answerDownvotes && account.answerDownvotes.includes(aid)){
+            // Change from downvote to upvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 2}})
+            await Account.findByIdAndUpdate(account._id, {$pull: {answerDownvotes: aid}, $push: {answerUpvotes: aid}})
+        } else {
+            // No previous upvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 1}})
+            await Account.findByIdAndUpdate(account._id, {$push: {answerUpvotes: aid}})
+        }
+    } else { // Downvote case
+        if (account.answerDownvotes && account.answerDownvotes.includes(aid)) {
+            // Revert previous downvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 1}});
+            await Account.findByIdAndUpdate(account._id, {$pull: {answerDownvotes: aid}})
+        } else if (account.answerUpvotes && account.answerUpvotes.includes(aid)){
+            // Change from upvote to downvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -2}})
+            await Account.findByIdAndUpdate(account._id, {$pull: {answerUpvotes: aid}, $push: {answerDownvotes: aid}})
+        } else {
+            // No previous downvote
+            answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -1}})
+            await Account.findByIdAndUpdate(account._id, {$push: {answerDownvotes: aid}})
+        }
+    }
     res.send({votes: answer.votes})
 })
 
-app.post("/comments/:cid/votes/:amt", async (req, res) => {
-    let comment = await Comment.findByIdAndUpdate(req.params.cid, {$inc: {votes: parseInt(req.params.amt)}});
+app.post("/comments/:cid/votes/:amt", isSignedIn, async (req, res) => {
+    let cid = req.params.cid;
+    let account = await Account.findOne({username: req.session.user});
+    let comment;
+    if (account.commentUpvotes && account.commentUpvotes.includes(cid)) {
+        // Revert previous upvote
+        comment = await Comment.findByIdAndUpdate(cid, {$inc: {votes: -1}});
+        await Account.findByIdAndUpdate(account._id, {$pull: {commentUpvotes: cid}})
+    } else {
+        // No previous upvote
+        comment = await Comment.findByIdAndUpdate(cid, {$inc: {votes: 1}})
+        await Account.findByIdAndUpdate(account._id, {$push: {commentUpvotes: cid}})
+    }
     res.send({votes: comment.votes})
 })
 
@@ -244,26 +353,27 @@ app.get("/tags", async(req, res) => {
     res.send({questions, tags});
 });
 
-app.post("/new_answer", async(req, res) => {
+app.post("/new_answer", isSignedIn, async(req, res) => {
     let answerFields = {
         text: req.body.candidateAnswer.text,
-        ans_by: req.body.candidateAnswer.ansBy,
+        ans_by: req.session.user,
         ans_date_time: req.body.candidateAnswer.ansDate
     }
     let newAnswer = new Answer(answerFields);
     await newAnswer.save();
     await Question.findByIdAndUpdate(req.body.qid, {$push: {answers: newAnswer}});
+    console.log("saved answer");
     res.sendStatus(200);
 });
 
-app.post("/new_question", async(req, res) => {
+app.post("/new_question", isSignedIn, async(req, res) => {
     let newTags = await getNewTags(req.body.tagIds[0]);
     let questionFields = {
         title: req.body.title,
         summary: req.body.summary,
         text: req.body.text,
         tags: newTags,
-        asked_by: req.body.askedBy,
+        asked_by: req.session.user,
         ask_date_time: req.body.askDate
     }
     let question = new Question(questionFields);

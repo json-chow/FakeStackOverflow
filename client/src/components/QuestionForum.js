@@ -66,9 +66,15 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
             {update["val"] === 1 && <div className="menu main top">
                 <div>
                     <h2>All Questions</h2>
-                    <button id="askquestion" hidden={notLoggedIn} onClick={() => {
-                        setSideColor(-1);
-                        nextState(2);
+                    <button id="askquestion" hidden={notLoggedIn} onClick={async () => {
+                        try {
+                            await model.get("http://localhost:8000/homepage", {withCredentials: true});
+                            setSideColor(-1);
+                            nextState(2);
+                        } catch (e) {
+                            nextState(5)
+                        }
+                        
                     }}>
                         Ask Question
                     </button>

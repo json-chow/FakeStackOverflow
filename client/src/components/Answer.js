@@ -1,18 +1,18 @@
 import CommentSection from "./CommentSection";
 import Vote from "./Vote";
 
-export default function Answer({model, answer}) {
+export default function Answer({model, answer, nextState, notLoggedIn}) {
     let aText = replaceHyperlinks(answer.text);
     return (
       <div className="acolumn">
           <div className="acolumn left">
-              <Vote model={model} aid={answer._id}/>
+              <Vote model={model} aid={answer._id} nextState={nextState}/>
           </div>
 
           <div className="acolumn mid">
               <p>{aText}</p>
               <br/>
-              <CommentSection model={model} aid={answer._id}/>
+              <CommentSection model={model} aid={answer._id} nextState={nextState} notLoggedIn={notLoggedIn}/>
           </div>
 
           <div className="acolumn right">

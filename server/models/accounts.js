@@ -18,6 +18,26 @@ const accountSchema = new Schema({
         type: String,
         required: true,
         minLength: 1
+    },
+    questionUpvotes: {
+        type: [Schema.Types.ObjectId],
+        ref: "Question"
+    },
+    questionDownvotes: {
+        type: [Schema.Types.ObjectId],
+        ref: "Question"
+    },
+    answerUpvotes: {
+        type: [Schema.Types.ObjectId],
+        ref: "Answer"
+    },
+    answerDownvotes: {
+        type: [Schema.Types.ObjectId],
+        ref: "Answer"
+    },
+    commentUpvotes: {
+        type: [Schema.Types.ObjectId],
+        ref: "Comment"
     }
 });
 

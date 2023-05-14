@@ -17,7 +17,7 @@ export default function AnswerForum( {model, nextState, notLoggedIn, currentQues
                 let tags = res.data["tags"];
                 currentQuestion = res.data["question"];
                 let shown_answers = answers.map((answer) => 
-                    <Answer key={answer._id} model={model} answer={answer} comments={answer.comments}/>
+                    <Answer key={answer._id} model={model} answer={answer} nextState={nextState} notLoggedIn={notLoggedIn}/>
                 )
                 let shown_tags = tags.map((tag) => 
                     <span className="qtag" key={tag._id}>{tag.name}</span>
@@ -50,7 +50,7 @@ export default function AnswerForum( {model, nextState, notLoggedIn, currentQues
                     <div className="aqbcolumn">
                         <div className="aqbcolumn left">
                             <p>{`${update["question"].views} views`}</p>
-                            <Vote model={model} qid={currentQuestion._id}/>
+                            <Vote model={model} qid={currentQuestion._id} nextState={nextState}/>
                         </div>
 
                         <div className="aqbcolumn mid">
@@ -65,7 +65,7 @@ export default function AnswerForum( {model, nextState, notLoggedIn, currentQues
                     </div>
                 </div>
                 <div className="menu main top2">
-                    <CommentSection model={model} qid={update["question"]._id}/>
+                    <CommentSection model={model} qid={update["question"]._id} nextState={nextState} notLoggedIn={notLoggedIn}/>
                 </div>
             </div>}
             {update["val"] === 1 && <div className="menu main bottom">

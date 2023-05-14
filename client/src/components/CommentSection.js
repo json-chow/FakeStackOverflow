@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Comment from "./Comment";
 
-export default function CommentSection( {model, qid, aid} ) {
+export default function CommentSection( {model, qid, aid, nextState, notLoggedIn} ) {
     const [update, setUpdate] = useState({val: 0, page: 1, max: 1});
     const [cmntVal, setCmntVal] = useState("");
     let addCmntRef = React.createRef();
@@ -17,7 +17,7 @@ export default function CommentSection( {model, qid, aid} ) {
             }}).then((res) => {
                 let comments = res.data["comments"];
                 let shown_cmnts = comments.map((comment) => 
-                    <Comment key={comment._id} model={model} comment={comment}/>
+                    <Comment key={comment._id} model={model} comment={comment} nextState={nextState}/>
                 )
                 setUpdate({val: 1, cmnts: shown_cmnts, page: update["page"], max: res.data["maxPages"]});
             }
@@ -37,7 +37,7 @@ export default function CommentSection( {model, qid, aid} ) {
                     setUpdate({...update, val: 0, page: (update["page"] % update["max"]) + 1})
                 }}>Next</button>}
             </div>
-            <button className="addcmnt" ref={addCmntRef} onClick={(e) => {
+            <button className="addcmnt" ref={addCmntRef} hidden={notLoggedIn} onClick={(e) => {
                 e.target.hidden = true;
                 inputRef.current.hidden = false;
                 inputBtnRef.current.hidden = false;
@@ -71,18 +71,19 @@ export default function CommentSection( {model, qid, aid} ) {
                     inputErrRef.current.hidden = false;
                     inputRef.current.style.border = "1px solid red";
                 } else {
-                    console.log("good")
-                    await model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/comments`, {
-                        text: cmntVal,
-                        cmnt_by: "userseven", // TODO: To be replaced by actual user,
-                        cmnt_date_time: Date.now()
-                    }).then(() => {
+                    try {
+                        await model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/comments`, {
+                            text: cmntVal,
+                            cmnt_by: "userseven", // TODO: To be replaced by actual user,
+                            cmnt_date_time: Date.now()}, {withCredentials: true});
                         addCmntRef.current.hidden = false;
                         inputRef.current.hidden = true;
                         inputBtnRef.current.hidden = true;
                         setUpdate({val: 0, page: 1})
                         setCmntVal("");
-                    });
+                    } catch (e) {
+                        nextState(5);
+                    }
                 }
             }}>
                 Add Comment

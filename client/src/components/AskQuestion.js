@@ -5,7 +5,6 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
     const [titleText, setTitleText] = useState("");
     const [questionSummary, setQuestionSummary] = useState("");
     const [questionText, setQuestionText] = useState("");
-    const [usernameText, setUsernameText] = useState("");
     const [questionTags, setQuestionTags] = useState("");
     return (
         <div className="menu main">
@@ -81,21 +80,6 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                     Enter between 1 to 5 tags, each at most 10 characters long.
                 </div>
             </div>
-            <div>
-                <p className="askQHeader">Username*</p>
-                <input className="usernameText"
-                    pattern="(\s*\S+\s*)+"
-                    value={usernameText}
-                    onChange={(e) => {
-                        setUsernameText(e.target.value);
-                        document.getElementById("userError").hidden = true;
-                        displayInvalidQInput(e);
-                    }}>
-                </input>
-                <div id="userError" className="qError" hidden={true}>
-                    Please enter a valid username -- username must not be empty.
-                </div>
-            </div>
             <button className="postQuestion" hidden={notLoggedIn} onClick={async () => {
                 if (detectBadHyperlink("questionText")) {
                     document.getElementById("hyperlinkError").hidden = false;
@@ -107,12 +91,14 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                         summary: questionSummary,
                         text: questionText,
                         tagIds: Array(questionTags.trim().split(" ")),
-                        askedBy : usernameText,
                         askDate: Date.now(),
                     });
-                    if (result) {
+                    console.log(result)
+                    if (result === 1) {
                         setSideColor(0);
                         nextState(0);
+                    } else if (result === 2) {
+                        nextState(5);
                     }
                 }
             }}>Post Question</button>
@@ -130,10 +116,8 @@ function displayInvalidQInput(e) {
             document.getElementById("questionError").hidden = false;
         } else if (cName === "questionSummary") {
             document.getElementById("summaryError").hidden = false;
-        } else if (cName === "questionTags") {
-            document.getElementById("tagError").hidden = false;
         } else {
-            document.getElementById("userError").hidden = false;
+            document.getElementById("tagError").hidden = false;
         }
     } else {
         if (cName === "titleText" && e.target.value.length > 50) {
@@ -176,11 +160,7 @@ async function processQuestionPost(model, candidateQuestion) {
     if (tagMismatch || candidateQuestion.tagIds[0][0] === "") {
         document.getElementById("tagError").hidden = false;
     }  
-    var uMismatch = document.getElementsByClassName("usernameText")[0].validity.patternMismatch;
-    if (uMismatch || candidateQuestion.askedBy.length === 0) {
-        document.getElementById("userError").hidden = false;
-    }  
-    var mismatch = tMismatch || sMismatch || qMismatch || tagMismatch || uMismatch;
+    var mismatch = tMismatch || sMismatch || qMismatch || tagMismatch;
     if (candidateQuestion.title.length <= 50
         && candidateQuestion.summary.length <= 140
         && candidateQuestion.title.trim().length >= 1
@@ -188,7 +168,6 @@ async function processQuestionPost(model, candidateQuestion) {
         && candidateQuestion.text.trim().length >= 1
         && candidateQuestion.tagIds.length >= 1
         && candidateQuestion.tagIds[0][0].trim().length >= 1
-        && candidateQuestion.askedBy.trim().length >= 1
         && !mismatch) {
         var tempList = [];
         var i = 0;
@@ -200,9 +179,13 @@ async function processQuestionPost(model, candidateQuestion) {
             i++;
         }
         candidateQuestion.tagIds[0] = tempList;
-        await model.post("http://localhost:8000/new_question", candidateQuestion)
-            .then(console.log("good"));
-        return 1;
+        try {
+            await model.post("http://localhost:8000/new_question", candidateQuestion, {withCredentials: true});
+            return 1;
+        } catch (e) {
+            console.log("bad session");
+            return 2;
+        }
     } else {
         return 0;
     }
