@@ -1,4 +1,4 @@
-export default function WelcomePage( {model, cookie, firstTimer, setUserState, nextState} ) {
+export default function WelcomePage( {model, cookie, setUserState, nextState, userState} ) {
     console.log("Cookie: " + cookie["val"]);
     model.get("http://localhost:8000/homepage", {withCredentials: true}).then((res) => {
         //console.log("\n\n\nres.data: " + res.data + "\n\n\n");

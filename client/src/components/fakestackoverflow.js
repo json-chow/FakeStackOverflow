@@ -21,7 +21,6 @@ export default function FakeStackOverflow() {
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [cookieState, setCookie] = useState({name: "", val: ""});
-    const [firstTimeUser, setFirst] = useState({first: 1});
 
     return (
         <>
@@ -65,9 +64,7 @@ export default function FakeStackOverflow() {
                         nextState={setShowState}
                         notLoggedIn={notLoggedIn}/>}
                 {showState === 5 &&
-                    <WelcomePage model={axios}
-                        firstTimer={firstTimeUser}
-                        setFirstTimer={setFirst}
+                    <WelcomePage model={axios}                        
                         cookie={cookieState}
                         nextState={setShowState}
                         setUserState={setUserState}
