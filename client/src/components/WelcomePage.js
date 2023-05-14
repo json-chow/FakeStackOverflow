@@ -1,4 +1,12 @@
-export default function WelcomePage( {nextState} ) {
+export default function WelcomePage( {model, cookie, nextState} ) {
+    console.log("Cookie: " + cookie["val"]);
+    if (cookie.val !== "") {
+        let reqSession = model.get("http://localhost:8000/homepage", {cookie});
+        console.log(reqSession);
+        if (reqSession === "sessionFound") {
+            nextState(7);
+        }
+    }
     return (
         <div className="menu main">
             <h2>Welcome to the greatest webthingy of all time.</h2>
@@ -7,7 +15,7 @@ export default function WelcomePage( {nextState} ) {
             }}>
                 Register
             </button>
-            <button id="login" onClick={() => {
+            <button id="login" onClick={async () => {
                 nextState(7);
             }}>
                 Returning User

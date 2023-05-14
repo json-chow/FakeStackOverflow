@@ -20,6 +20,7 @@ export default function FakeStackOverflow() {
     const [notLoggedIn, setUserState] = useState(1);
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [cookieState, setCookie] = useState({name: "", val: ""});
 
     return (
         <>
@@ -64,12 +65,14 @@ export default function FakeStackOverflow() {
                         notLoggedIn={notLoggedIn}/>}
                 {showState === 5 &&
                     <WelcomePage model={axios}
+                        cookie={cookieState}
                         nextState={setShowState}/>}
                 {showState === 6 &&
                     <CreateAccountPage model={axios}
                         nextState={setShowState}/>}
                 {showState === 7 &&
                     <LoginPage model={axios}
+                        setCookie={setCookie}
                         nextState={setShowState}
                         userState={setUserState}/>}
             </div>

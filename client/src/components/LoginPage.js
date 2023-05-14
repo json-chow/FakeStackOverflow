@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function LoginPage( {model, userState, nextState} ) {
+export default function LoginPage( {model, userState, nextState, setCookie} ) {
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
         model.get("http://localhost:8000/")
@@ -58,8 +58,8 @@ export default function LoginPage( {model, userState, nextState} ) {
                     const serverResponse = await model.post("http://localhost:8000/user", {username,password});
                     console.log("serverResponse.data: " + serverResponse.data);
                     if (serverResponse.data === "accessGranted") {
-                        const cookie = await model.get("http://localhost:8000/new_cookie");
-                        console.log("COOKIE: \n" + cookie.val);
+                        console.log("serverResponse.cookies: \n" + serverResponse.cookies);
+                        setCookie({name: username, val: serverResponse.val});
                         userState(0);
                         nextState(0);
                     }

@@ -33,24 +33,29 @@ app.use(express.urlencoded({ extended: true }));
 //serving public file
 app.use(express.static(__dirname));
 
-const oneDay = 1000 * 60 * 60 * 24;
+const oneHour = 1000*60*60;
 app.use(sessions({
     secret: "defaultKey",
     saveUninitialized:true,
-    cookie: { maxAge: oneDay },
+    cookie: { 
+        httpOnly: false, 
+        maxAge: oneHour 
+    },
     resave: false 
 }));
 
-app.get('/new_session', (req, res) => {
-    console.log(req.sessionID);
-    res.cookie("sessionRetrieved",req.sessionID);
-    res.send('sessionRetrieved');
-});
-
-app.get('/new_cookie', (req, res) => {
-    console.log(req.sessionID);
-    res.cookie("cookieName",req.sessionID);
-    res.send('cookieSaved');
+app.get('/homepage', (req, res) => {
+    console.log("req.cookies: " + req.cookies[req.body.username]);
+    console.log("req.sessionID: " + req.cookies.sessionID);
+    if (req.cookies[req.body.username] === undefined) {
+        res.send("youGaveMeNoCookie");
+    }
+    if (req.cookies.sessionID === req.cookies.sessionID) {
+        res.send('sessionFound');
+    }
+    else {
+        res.send('noSessionFound');
+    }
 });
 
 app.post('/user', async(req,res) => {
@@ -59,14 +64,16 @@ app.post('/user', async(req,res) => {
         res.send("usrW1");
     }
     else {
-        console.log(account);
+        console.log("Account: " + account);
         const match = await bcrypt.compare(req.body.password, account[0].password);
         if (match) {
-            let session = new Session();
-            session=req.session;
-            session._id=req.body.username;
-            session.secret = Math.random().toPrecision(21).toString();
-            await session.save();
+            let sessionInfo=req.session;
+            sessionInfo._id=req.body.username;
+            sessionInfo.secret = Math.random().toPrecision(21).toString();
+            res.cookie(req.body.username, sessionInfo.secret, {httpOnly: false});
+            console.log();
+            let dbSession = new Session({id: sessionInfo._id, secret: sessionInfo.secret})
+            await dbSession.save();
             res.send("accessGranted");
         }
         else {

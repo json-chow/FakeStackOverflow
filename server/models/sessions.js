@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const oneDay = 1000 * 60 * 60 * 24;
 const sessionSchema = new Schema({
+    id: {type: String},
     secret: {type: String},
     saveUninitialized: {type: Boolean},
     cookie: {},
