@@ -3,6 +3,9 @@ import LogoutBtn from "./LogoutButton";
 export default function Header( {nextState, userState, notLoggedIn, onQueryChange, showState} ) {
     return (
         <div id="header" className="header">
+            {([0, 1, 2, 3, 4].includes(showState) && notLoggedIn === 0) ? 
+                  <LogoutBtn nextState = {nextState}
+                  userState={userState}/> : <div></div>}
             <span>Fake Stack Overflow</span>
             {[0, 1, 2, 3, 4].includes(showState) && 
               <input type="text"
@@ -15,9 +18,6 @@ export default function Header( {nextState, userState, notLoggedIn, onQueryChang
                 }}
               />
             }
-            {([0, 1, 2, 3, 4].includes(showState) && notLoggedIn === 0) && 
-                <LogoutBtn nextState = {nextState}
-                userState={userState}/>}
         </div>
     )
 }
