@@ -66,7 +66,8 @@ export default function FakeStackOverflow() {
                 {showState === 5 &&
                     <WelcomePage model={axios}
                         cookie={cookieState}
-                        nextState={setShowState}/>}
+                        nextState={setShowState}
+                        changeUserState={setUserState}/>}
                 {showState === 6 &&
                     <CreateAccountPage model={axios}
                         nextState={setShowState}/>}

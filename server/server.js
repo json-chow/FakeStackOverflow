@@ -57,6 +57,12 @@ app.get('/homepage', (req, res) => {
     }
 });
 
+app.post('/logout', (req,res) => {
+    req.session.destroy(() => {
+        res.send("Could not log out. Please exit application and reconnect.");
+    });
+});
+
 app.post('/user', async(req,res) => {
     const account = await Account.find({username: req.body.username});
     if (!account || account[0] === undefined) {

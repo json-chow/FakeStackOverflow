@@ -1,8 +1,9 @@
-export default function WelcomePage( {model, cookie, nextState} ) {
+export default function WelcomePage( {model, cookie, changeUserState, nextState} ) {
     console.log("Cookie: " + cookie["val"]);
     model.get("http://localhost:8000/homepage", {withCredentials: true}).then((res) => {
         console.log(res.data);
         if (res.data === "sessionFound") {
+            changeUserState(0);
             nextState(0);
         }
     });
