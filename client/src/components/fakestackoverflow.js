@@ -9,7 +9,7 @@ import PostAnswer from './PostAnswer.js';
 import WelcomePage from './WelcomePage.js';
 import CreateAccountPage from './CreateAccountPage.js';
 import LoginPage from './LoginPage.js';
-import LogoutBtn from './LogoutButton.js';
+import Profile from './Profile.js';
 
 // var model = new Model();
 const axios = require("axios");
@@ -33,7 +33,7 @@ export default function FakeStackOverflow() {
                     onQueryChange={setQuery}
                     showState={showState}/>
             <div id="main" className="main">
-                {[0, 1, 2, 3, 4].includes(showState) && 
+                {[0, 1, 2, 3, 4, 8].includes(showState) && 
                     <Sidebar sideColor={sideColor}
                     setSideColor={setSideColor}
                     setQuery={setQuery}
@@ -58,6 +58,7 @@ export default function FakeStackOverflow() {
                         setSideColor={setSideColor}
                         nextState={setShowState}
                         notLoggedIn={notLoggedIn}
+                        currentQuestion={currentQuestion}
                         setUserState={setUserState}
                         setDbFailure={setDbFailure}/>
                     }
@@ -94,6 +95,9 @@ export default function FakeStackOverflow() {
                         nextState={setShowState}
                         setUserState={setUserState}
                         setDbFailure={setDbFailure}/>}
+                {showState === 8 &&
+                    <Profile setCurrentQuestion={setCurrentQuestion}
+                        nextState={setShowState}/>}
             </div>
         </>
     );

@@ -23,7 +23,7 @@ section {
     border: 1px solid black;
     overflow: hidden;
     display: grid;
-    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-columns: 1fr 1fr 6fr 1fr 1fr;
     justify-items: center;
 }
 
@@ -250,7 +250,7 @@ a {
     font-size: large;
     border: none;
     background-color: white;
-    color: #551A8B;
+    color: rgb(0, 116, 204);
     font-family: 'Times New Roman';
 }
 
@@ -732,4 +732,49 @@ CSS tags for 'Question Post' section:
     padding-right: 10px;
     margin-top: 5%;
     margin-bottom: 10%;
+}
+
+#enterProfile {
+    color: black;
+    background-color: green;
+    padding: 10px;
+    margin-top: 5%;
+    margin-bottom: 10%
+}
+
+#username {
+    font-size: xx-large;
+}
+
+#profileOptions {
+    display: flex;
+    justify-content: space-around;
+}
+
+.profileBtn {
+    border: none;
+    border-radius: 5px;
+    background-color: white;
+    padding: 1em;
+}
+
+.profileQuestions {
+    display: block;
+    border: none;
+    color: rgb(0, 116, 204);
+    font-size: large;
+    background-color: white;
+}
+
+.profileQuestions:active {
+    color: red
+}
+
+#deleteQuestion {
+    background-color: red;
+    color: white;
+    margin-left: 8%;
+    margin-top: 2%;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }

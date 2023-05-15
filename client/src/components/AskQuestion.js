@@ -1,11 +1,12 @@
 import { useState } from "react";
 
 
-export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn, setUserState, setDbFailure} ) {
-    const [titleText, setTitleText] = useState("");
-    const [questionSummary, setQuestionSummary] = useState("");
-    const [questionText, setQuestionText] = useState("");
-    const [questionTags, setQuestionTags] = useState("");
+export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn, currentQuestion, setUserState, setDbFailure} ) {
+    const [titleText, setTitleText] = useState(currentQuestion ? currentQuestion.title : "");
+    const [questionSummary, setQuestionSummary] = useState(currentQuestion ? currentQuestion.summary : "");
+    const [questionText, setQuestionText] = useState(currentQuestion ? currentQuestion.text : "");
+    const [questionTags, setQuestionTags] = useState(currentQuestion ? currentQuestion.tags.map((t) => t.name).join(" ") : "");
+    let edit = currentQuestion ? true : false;
     return (
         <div className="menu main">
             <div>
@@ -92,7 +93,8 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                         text: questionText,
                         tagIds: Array(questionTags.trim().split(" ")),
                         askDate: Date.now(),
-                    },
+                        qid: edit ? currentQuestion._id : -1
+                    }, edit,
                     setDbFailure);
                     console.log(result)
                     if (result === 1) {
@@ -103,7 +105,15 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                         nextState(5);
                     }
                 }
-            }}>Post Question</button>
+            }}>{(edit ? "Modify" : "Post") + " Question"}</button>
+            <button id="deleteQuestion" hidden={!edit} onClick={() => {
+                model.post(`http://localhost:8000/question/${currentQuestion._id}/delete`, {}, {withCredentials: true}).then((res) => {
+                    setSideColor(0);
+                    nextState(0);
+                }).catch((e) => {
+                    nextState(5);
+                })
+            }}>Delete Question</button>
             <p className="mandatoryFieldsWarning">* indicates mandatory fields</p>
         </div>
     )
@@ -145,7 +155,7 @@ function detectBadHyperlink(className) {
     return 0;
 }
 
-async function processQuestionPost(model, candidateQuestion, setDbFailure) {
+async function processQuestionPost(model, candidateQuestion, edit, setDbFailure) {
     var tMismatch = document.getElementsByClassName("titleText")[0].validity.patternMismatch;
     if (tMismatch || candidateQuestion.title.length === 0 || candidateQuestion.title.length > 50) {
         document.getElementById("titleError").hidden = false;
@@ -182,7 +192,7 @@ async function processQuestionPost(model, candidateQuestion, setDbFailure) {
         }
         candidateQuestion.tagIds[0] = tempList;
         try {
-            await model.post("http://localhost:8000/new_question", candidateQuestion, {withCredentials: true});
+            await model.post("http://localhost:8000/new_question", {...candidateQuestion, edit: edit}, {withCredentials: true});
             return 1;
         } catch (e) {
             console.log("bad session");

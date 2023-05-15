@@ -23,6 +23,32 @@ export default function CommentSection( {model, qid, aid, nextState, notLoggedIn
             }
         )
     }
+
+    let postComment = async function() {
+        let input = inputRef.current;
+        if (detectBadHyperlink(cmntVal)) {
+            inputLinkErrRef.current.hidden = false;
+        }
+        if (input.validity.patternMismatch || cmntVal.length > 140 || cmntVal.length === 0) {
+            inputErrRef.current.hidden = false;
+            inputRef.current.style.border = "1px solid red";
+        } else {
+            try {
+                await model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/comments`, {
+                    text: cmntVal,
+                    cmnt_by: "userseven", // TODO: To be replaced by actual user,
+                    cmnt_date_time: Date.now()}, {withCredentials: true});
+                addCmntRef.current.hidden = false;
+                inputRef.current.hidden = true;
+                inputBtnRef.current.hidden = true;
+                setUpdate({val: 0, page: 1})
+                setCmntVal("");
+            } catch (e) {
+                setDbFailure("comment");
+                nextState(5);
+            }
+        }
+    }
     return (
         <>
             {update["cmnts"]}
@@ -60,33 +86,14 @@ export default function CommentSection( {model, qid, aid, nextState, notLoggedIn
                             inputLinkErrRef.current.hidden = true;
                             e.target.style.border = "1px solid black"
                         }
+                    }}
+                    onKeyUp={(e) => {
+                        if (e.key === "Enter") {
+                            postComment();
+                        }
                     }}>
             </input>
-            <button ref={inputBtnRef} hidden={true} onClick={async () => {
-                let input = inputRef.current;
-                if (detectBadHyperlink(cmntVal)) {
-                    inputLinkErrRef.current.hidden = false;
-                }
-                if (input.validity.patternMismatch || cmntVal.length > 140 || cmntVal.length === 0) {
-                    inputErrRef.current.hidden = false;
-                    inputRef.current.style.border = "1px solid red";
-                } else {
-                    try {
-                        await model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/comments`, {
-                            text: cmntVal,
-                            cmnt_by: "userseven", // TODO: To be replaced by actual user,
-                            cmnt_date_time: Date.now()}, {withCredentials: true});
-                        addCmntRef.current.hidden = false;
-                        inputRef.current.hidden = true;
-                        inputBtnRef.current.hidden = true;
-                        setUpdate({val: 0, page: 1})
-                        setCmntVal("");
-                    } catch (e) {
-                        setDbFailure("comment");
-                        nextState(5);
-                    }
-                }
-            }}>
+            <button ref={inputBtnRef} hidden={true} onClick={postComment}>
                 Add Comment
             </button>
             <div ref={inputErrRef} style={{color: "red"}} hidden={true}>

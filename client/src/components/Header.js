@@ -4,13 +4,15 @@ export default function Header( {nextState, setUserState, userState, logoutClick
     return (
         <div id="header" className="header">
             {([0, 1, 2, 3, 4].includes(showState) && userState === 0) ? 
+                  <button id="enterProfile" onClick={() => {nextState(8)}}>Enter Profile</button> : <div></div>}
+            {([0, 1, 2, 3, 4, 8].includes(showState) && userState === 0) ? 
                   <LogoutBtn nextState = {nextState}
                   logoutClicked={logoutClicked}
                   userState={userState}
                   setClicked={setClicked}
                   setUserState={setUserState}/> : <div></div>}
             <span>Fake Stack Overflow</span>
-            {[0, 1, 2, 3, 4].includes(showState) && 
+            {[0, 1, 2, 3, 4, 8].includes(showState) && 
               <input type="text"
                 name="search"
                 id="search"

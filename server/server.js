@@ -108,7 +108,8 @@ app.post("/new_account", async(req, res) => {
     let accountFields = {
         username: req.body.username,
         password: hashedPassword,
-        accountName: req.body.accountName
+        accountName: req.body.accountName,
+        dateCreated: Date.now()
     }
     let newAccount = new Account(accountFields);
     await newAccount.save();
@@ -261,28 +262,34 @@ app.post("/posts/question/:qid/votes/:amt", isSignedIn, async (req, res) => {
             // Revert previous upvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -1}});
             await Account.findByIdAndUpdate(account._id, {$pull: {questionUpvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: -5}})
         } else if (account.questionDownvotes && account.questionDownvotes.includes(qid)){
             // Change from downvote to upvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 2}})
             await Account.findByIdAndUpdate(account._id, {$pull: {questionDownvotes: qid}, $push: {questionUpvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: 15}})
         } else {
             // No previous upvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 1}})
             await Account.findByIdAndUpdate(account._id, {$push: {questionUpvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: 5}})
         }
     } else { // Downvote case
         if (account.questionDownvotes && account.questionDownvotes.includes(qid)) {
             // Revert previous downvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: 1}});
             await Account.findByIdAndUpdate(account._id, {$pull: {questionDownvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: 10}})
         } else if (account.questionUpvotes && account.questionUpvotes.includes(qid)){
             // Change from upvote to downvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -2}})
             await Account.findByIdAndUpdate(account._id, {$pull: {questionUpvotes: qid}, $push: {questionDownvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: -15}})
         } else {
             // No previous downvote
             question = await Question.findByIdAndUpdate(qid, {$inc: {votes: -1}})
             await Account.findByIdAndUpdate(account._id, {$push: {questionDownvotes: qid}})
+            await Account.findOneAndUpdate({username: question.asked_by}, {$inc: {reputation: -10}})
         }
     }
     res.send({votes: question.votes})
@@ -298,28 +305,34 @@ app.post("/posts/answer/:aid/votes/:amt", isSignedIn, async (req, res) => {
             // Revert previous upvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -1}});
             await Account.findByIdAndUpdate(account._id, {$pull: {answerUpvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: -5}})
         } else if (account.answerDownvotes && account.answerDownvotes.includes(aid)){
             // Change from downvote to upvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 2}})
             await Account.findByIdAndUpdate(account._id, {$pull: {answerDownvotes: aid}, $push: {answerUpvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: 15}})
         } else {
             // No previous upvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 1}})
             await Account.findByIdAndUpdate(account._id, {$push: {answerUpvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: 5}})
         }
     } else { // Downvote case
         if (account.answerDownvotes && account.answerDownvotes.includes(aid)) {
             // Revert previous downvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: 1}});
             await Account.findByIdAndUpdate(account._id, {$pull: {answerDownvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: 10}})
         } else if (account.answerUpvotes && account.answerUpvotes.includes(aid)){
             // Change from upvote to downvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -2}})
             await Account.findByIdAndUpdate(account._id, {$pull: {answerUpvotes: aid}, $push: {answerDownvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: -15}})
         } else {
             // No previous downvote
             answer = await Answer.findByIdAndUpdate(aid, {$inc: {votes: -1}})
             await Account.findByIdAndUpdate(account._id, {$push: {answerDownvotes: aid}})
+            await Account.findOneAndUpdate({username: answer.ans_by}, {$inc: {reputation: -10}})
         }
     }
     res.send({votes: answer.votes})
@@ -361,6 +374,7 @@ app.post("/new_answer", isSignedIn, async(req, res) => {
 });
 
 app.post("/new_question", isSignedIn, async(req, res) => {
+    let edit = req.body.edit;
     let newTags = await getNewTags(req.body.tagIds[0]);
     let questionFields = {
         title: req.body.title,
@@ -370,10 +384,40 @@ app.post("/new_question", isSignedIn, async(req, res) => {
         asked_by: req.session.user,
         ask_date_time: req.body.askDate
     }
-    let question = new Question(questionFields);
-    await question.save();
+    if (edit) {
+        delete questionFields.ask_date_time;
+        await Question.findByIdAndUpdate(req.body.qid, questionFields)
+    } else {
+        let question = new Question(questionFields);
+        await question.save();
+    }
     res.sendStatus(200);
 });
+
+app.post("/question/:qid/delete", isSignedIn, async(req, res) => {
+    let question = await Question.findById(req.params.qid);
+    let answers = await Answer.find({_id: {$in: question.answers}});
+    // Delete comments under answers
+    for (let i = 0; i < answers.length; i++) {
+        await Comment.deleteMany({_id: {$in: answers[i].comments}});
+    }
+    // Delete associated answers
+    await Answer.deleteMany({_id: {$in: question.answers}})
+    // Delete associated comments
+    await Comment.deleteMany({_id: {$in: question.comments}})
+    // Delete question
+    await Question.findByIdAndDelete(req.params.qid);
+    res.sendStatus(200);
+});
+
+app.get("/profile", isSignedIn, async(req, res) => {
+    let account = await Account.findOne({username: req.session.user});
+    let questions = await Question.find({asked_by: account.username}).populate("tags");
+    res.send({name: account.username,
+              dateCreated: account.dateCreated,
+              reputation: account.reputation,
+              questions: questions});
+})
 
 app.listen(8000, () => {
     console.log("Listening on port 8000");

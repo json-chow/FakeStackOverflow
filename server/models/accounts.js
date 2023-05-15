@@ -38,6 +38,14 @@ const accountSchema = new Schema({
     commentUpvotes: {
         type: [Schema.Types.ObjectId],
         ref: "Comment"
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now()
+    },
+    reputation: {
+        type: Number,
+        default: 0
     }
 });
 

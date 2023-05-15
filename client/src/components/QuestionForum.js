@@ -70,8 +70,10 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
                         try {
                             await model.get("http://localhost:8000/homepage", {withCredentials: true});
                             setSideColor(-1);
+                            setCurrentQuestion(0);
                             nextState(2);
                         } catch (e) {
+                            setCurrentQuestion(0);
                             nextState(5)
                         }
                         
