@@ -7,8 +7,8 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
     console.log("UserState: " + userState);
     model.get("http://localhost:8000/homepage", {withCredentials: true}).then(async (res) => { // db error => sign out user
         console.log("Response from Server: " + res.data);
-        console.log(dbFailure);
-        if (dbFailure.type !== "") {
+        console.log(dbFailure.type);
+        if (dbFailure.type !== "" && dbFailure.type !== undefined) {
             document.getElementById("defaultMessage").hidden=true;
             document.getElementById("logoutMessage").hidden=true;
             if (dbFailure === "question") {
@@ -50,7 +50,6 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
             await timeout();
             setClicked(0);
             setUserState(1);
-            nextState(5);
         }
         else if (!logoutClicked) { // initial welcome page message
             console.log("initialHomepage");
@@ -59,7 +58,6 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
             document.getElementById("dbErrorQuestion").hidden=true;
             document.getElementById("dbErrorAnswer").hidden=true;
             document.getElementById("defaultMessage").hidden=false;
-            document.getElementById("logoutMessage").hidden=true;
             setUserState(1);
             nextState(5);
         }
