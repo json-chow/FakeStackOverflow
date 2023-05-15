@@ -48,8 +48,9 @@ app.use(sessions({
     resave: false 
 }));
 
-function isSignedIn(req, res, next) {
-    if (req.session.user) {
+async function isSignedIn(req, res, next) {
+    let session = await Session.findOne({id: req.session.user});
+    if (session) {
         next();
     } else {
         console.log("401: Session Not Found")
@@ -68,11 +69,6 @@ app.get('/homepage', async(req, res) => {
 });
 
 app.post('/logout', async(req,res) => {
-    console.log("req.session.user: " + req.session.user);
-    let sessions = await Session.find({});
-    console.log("Sessions List: " + sessions);
-    let x = await Session.findOne({id: req.session.user});
-    console.log("Located Session: " + x);
     let deletedSession = await Session.deleteOne({id: req.session.user});
     if (deletedSession) {
         req.session.destroy();
@@ -89,7 +85,6 @@ app.post('/user', async(req,res) => {
         res.send("usrW1");
     }
     else {
-        console.log("Account: " + account);
         const match = await bcrypt.compare(req.body.password, account[0].password);
         if (match) {
             let sessionInfo=req.session;
@@ -98,7 +93,6 @@ app.post('/user', async(req,res) => {
             // res.cookie(req.body.username, sessionInfo.secret, {httpOnly: false});
             let dbSession = new Session({id: sessionInfo.user, secret: sessionInfo.secret})
             await dbSession.save();
-            console.log(sessionInfo);
             res.send("accessGranted");
         }
         else {

@@ -1,11 +1,14 @@
 import LogoutBtn from "./LogoutButton";
 
-export default function Header( {nextState, userState, notLoggedIn, onQueryChange, showState} ) {
+export default function Header( {nextState, setUserState, userState, logoutClicked, setClicked, onQueryChange, showState} ) {
     return (
         <div id="header" className="header">
-            {([0, 1, 2, 3, 4].includes(showState) && notLoggedIn === 0) ? 
+            {([0, 1, 2, 3, 4].includes(showState) && userState === 0) ? 
                   <LogoutBtn nextState = {nextState}
-                  userState={userState}/> : <div></div>}
+                  logoutClicked={logoutClicked}
+                  userState={userState}
+                  setClicked={setClicked}
+                  setUserState={setUserState}/> : <div></div>}
             <span>Fake Stack Overflow</span>
             {[0, 1, 2, 3, 4].includes(showState) && 
               <input type="text"

@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import Comment from "./Comment";
 
-export default function CommentSection( {model, qid, aid, nextState, notLoggedIn} ) {
+export default function CommentSection( {model, qid, aid, nextState, notLoggedIn, setDbFailure} ) {
     const [update, setUpdate] = useState({val: 0, page: 1, max: 1});
     const [cmntVal, setCmntVal] = useState("");
     let addCmntRef = React.createRef();
@@ -82,6 +82,7 @@ export default function CommentSection( {model, qid, aid, nextState, notLoggedIn
                         setUpdate({val: 0, page: 1})
                         setCmntVal("");
                     } catch (e) {
+                        setDbFailure("comment");
                         nextState(5);
                     }
                 }

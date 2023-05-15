@@ -18,12 +18,20 @@ export default function FakeStackOverflow() {
     const [query, setQuery] = useState({nontags: [], tags: [], sortBy: undefined});
     const [sideColor, setSideColor] = useState(0);
     const [notLoggedIn, setUserState] = useState(1);
+    const [logoutClicked, setClicked] = useState(0);
     const [showState, setShowState] = useState(5);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [cookieState, setCookie] = useState({name: "", val: ""});
+    const [dbFailure, setDbFailure] = useState({type: ""});
     return (
         <>
-            <Header nextState={setShowState} userState={setUserState} notLoggedIn={notLoggedIn} onQueryChange={setQuery} showState={showState}/>
+            <Header logoutClicked={logoutClicked}
+                    nextState={setShowState}
+                    userState={notLoggedIn}
+                    setUserState={setUserState}
+                    setClicked={setClicked}
+                    onQueryChange={setQuery}
+                    showState={showState}/>
             <div id="main" className="main">
                 {[0, 1, 2, 3, 4].includes(showState) && 
                     <Sidebar sideColor={sideColor}
@@ -49,13 +57,17 @@ export default function FakeStackOverflow() {
                     <AskQuestion model={axios}
                         setSideColor={setSideColor}
                         nextState={setShowState}
-                        notLoggedIn={notLoggedIn}/>
+                        notLoggedIn={notLoggedIn}
+                        setUserState={setUserState}
+                        setDbFailure={setDbFailure}/>
                     }
                 {showState === 3 && 
                     <PostAnswer model={axios}
                         qid={currentQuestion._id}
                         nextState={setShowState}
-                        notLoggedIn={notLoggedIn}/>}
+                        notLoggedIn={notLoggedIn}
+                        setUserState={setUserState}
+                        setDbFailure={setDbFailure}/>}
                 {showState === 4 && 
                     <TagPage model={axios}
                         setSideColor={setSideColor}
@@ -63,11 +75,16 @@ export default function FakeStackOverflow() {
                         nextState={setShowState}
                         notLoggedIn={notLoggedIn}/>}
                 {showState === 5 &&
-                    <WelcomePage model={axios}                        
+                    <WelcomePage model={axios}
                         cookie={cookieState}
+                        setQuery={setQuery}
                         nextState={setShowState}
                         setUserState={setUserState}
-                        userState={notLoggedIn}/>}
+                        logoutClicked={logoutClicked}
+                        userState={notLoggedIn}
+                        setClicked={setClicked}
+                        dbFailure={dbFailure}
+                        setDbFailure={setDbFailure}/>}
                 {showState === 6 &&
                     <CreateAccountPage model={axios}
                         nextState={setShowState}/>}
@@ -75,7 +92,8 @@ export default function FakeStackOverflow() {
                     <LoginPage model={axios}
                         setCookie={setCookie}
                         nextState={setShowState}
-                        userState={setUserState}/>}
+                        setUserState={setUserState}
+                        setDbFailure={setDbFailure}/>}
             </div>
         </>
     );

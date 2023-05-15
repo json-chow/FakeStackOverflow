@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function LoginPage( {model, userState, nextState, setCookie} ) {
+export default function LoginPage( {model, setUserState, nextState, setCookie, setDbFailure} ) {
     const [update, setUpdate] = useState({val: 0, accounts: []});
     if (update["val"] === 0) {
         model.get("http://localhost:8000/")
@@ -56,11 +56,10 @@ export default function LoginPage( {model, userState, nextState, setCookie} ) {
                 }
                 if (flag) {
                     const serverResponse = await model.post("http://localhost:8000/user", {username,password}, {withCredentials: true});
-                    console.log("serverResponse.data: " + serverResponse.data);
                     if (serverResponse.data === "accessGranted") {
-                        console.log("serverResponse.cookies: \n" + serverResponse.cookies);
                         setCookie({name: username, val: serverResponse.val});
-                        userState(0);
+                        setUserState(0);
+                        setDbFailure("");
                         nextState(0);
                     }
                     else {

@@ -3,7 +3,7 @@ import Answer from './Answer.js';
 import CommentSection from './CommentSection.js';
 import Vote from './Vote.js';
 
-export default function AnswerForum( {model, nextState, notLoggedIn, currentQuestion} ) {
+export default function AnswerForum( {model, nextState, notLoggedIn, currentQuestion, setDbFailure} ) {
     const [update, setUpdate] = useState({val: 0, answers: "", question: currentQuestion, numAnswers: 0, page: 1, max: 1, incViews: 1});
     if (update["val"] === 0) {
         model.get(`http://localhost:8000/posts/question/${currentQuestion._id}`, {
@@ -65,7 +65,7 @@ export default function AnswerForum( {model, nextState, notLoggedIn, currentQues
                     </div>
                 </div>
                 <div className="menu main top2">
-                    <CommentSection model={model} qid={update["question"]._id} nextState={nextState} notLoggedIn={notLoggedIn}/>
+                    <CommentSection model={model} qid={update["question"]._id} nextState={nextState} notLoggedIn={notLoggedIn} setDbFailure={setDbFailure}/>
                 </div>
             </div>}
             {update["val"] === 1 && <div className="menu main bottom">

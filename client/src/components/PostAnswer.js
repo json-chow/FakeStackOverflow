@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 
-export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
+export default function PostAnswer( {model, qid, nextState, notLoggedIn, setUserState, setDbFailure} ) {
     const [answerText, setAnswerText] = useState("");
 
     return (
@@ -31,10 +31,12 @@ export default function PostAnswer( {model, qid, nextState, notLoggedIn} ) {
                 if (detectBadHyperlink()) {
                     document.getElementById("ahyperlinkError").hidden = false;
                 } else {
-                    let result = await processAnswerPost(model, {text: answerText, ansDate : new Date()}, qid);
+                    let result = await processAnswerPost(model, {text: answerText, ansDate : new Date()}, qid, setDbFailure);
+                    console.log(result);
                     if (result === 1) {
                         nextState(1);
                     } else if (result === 2) {
+                        setUserState(0);
                         nextState(5);
                     }
                 }
@@ -69,7 +71,7 @@ function detectBadHyperlink() {
     return 0;
 }
 
-async function processAnswerPost(model, candidateAnswer, qid) {
+async function processAnswerPost(model, candidateAnswer, qid, setDbFailure) {
     var ansMismatch = document.getElementsByClassName("answerText")[0].validity.patternMismatch;
     if (!document.getElementById("answerTextId").value.match(/(\s*\S+\s*)+/g) || candidateAnswer.text === undefined) {
       document.getElementById("answerError").hidden = false;
@@ -80,6 +82,7 @@ async function processAnswerPost(model, candidateAnswer, qid) {
             await model.post("http://localhost:8000/new_answer", {candidateAnswer, qid: qid}, {withCredentials: true})
             return 1;
         } catch (e) {
+            setDbFailure("answer");
             return 2;
         }
     } else {

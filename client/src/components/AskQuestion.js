@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 
-export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn} ) {
+export default function AskQuestion( {model, setSideColor, nextState, notLoggedIn, setUserState, setDbFailure} ) {
     const [titleText, setTitleText] = useState("");
     const [questionSummary, setQuestionSummary] = useState("");
     const [questionText, setQuestionText] = useState("");
@@ -92,12 +92,14 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                         text: questionText,
                         tagIds: Array(questionTags.trim().split(" ")),
                         askDate: Date.now(),
-                    });
+                    },
+                    setDbFailure);
                     console.log(result)
                     if (result === 1) {
                         setSideColor(0);
                         nextState(0);
                     } else if (result === 2) {
+                        setUserState(0);
                         nextState(5);
                     }
                 }
@@ -143,7 +145,7 @@ function detectBadHyperlink(className) {
     return 0;
 }
 
-async function processQuestionPost(model, candidateQuestion) {
+async function processQuestionPost(model, candidateQuestion, setDbFailure) {
     var tMismatch = document.getElementsByClassName("titleText")[0].validity.patternMismatch;
     if (tMismatch || candidateQuestion.title.length === 0 || candidateQuestion.title.length > 50) {
         document.getElementById("titleError").hidden = false;
@@ -184,6 +186,7 @@ async function processQuestionPost(model, candidateQuestion) {
             return 1;
         } catch (e) {
             console.log("bad session");
+            setDbFailure("question");
             return 2;
         }
     } else {
