@@ -19,6 +19,11 @@ const accountSchema = new Schema({
         required: true,
         minLength: 1
     },
+    admin: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     questionUpvotes: {
         type: [Schema.Types.ObjectId],
         ref: "Question"

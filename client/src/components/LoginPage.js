@@ -55,7 +55,7 @@ export default function LoginPage( {model, setUserState, nextState, setCookie, s
                     document.getElementById("pwdW0").hidden = false;
                 }
                 if (flag) {
-                    const serverResponse = await model.post("http://localhost:8000/user", {username,password}, {withCredentials: true});
+                    const serverResponse = await model.post("http://localhost:8000/create_session", {username,password}, {withCredentials: true});
                     if (serverResponse.data === "accessGranted") {
                         setCookie({name: username, val: serverResponse.val});
                         setUserState(0);

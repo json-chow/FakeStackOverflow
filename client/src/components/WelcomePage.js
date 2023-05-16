@@ -5,10 +5,10 @@ const timeout = async() => {
 
 export default function WelcomePage( {model, logoutClicked, setClicked, nextState, setUserState, userState, dbFailure, setDbFailure} ) {
     console.log("UserState: " + userState);
-    model.get("http://localhost:8000/homepage", {withCredentials: true}).then(async (res) => { // db error => sign out user
+    model.get("http://localhost:8000/homepage", {withCredentials: true}).then(async (res) => {
         console.log("Response from Server: " + res.data);
         console.log(dbFailure.type);
-        if (dbFailure.type !== "" && dbFailure.type !== undefined) {
+        if (dbFailure.type !== "" && dbFailure.type !== undefined) { // db error => sign out user
             document.getElementById("defaultMessage").hidden=true;
             document.getElementById("logoutMessage").hidden=true;
             if (dbFailure === "question") {

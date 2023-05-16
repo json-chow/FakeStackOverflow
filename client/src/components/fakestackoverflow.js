@@ -23,6 +23,7 @@ export default function FakeStackOverflow() {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [cookieState, setCookie] = useState({name: "", val: ""});
     const [dbFailure, setDbFailure] = useState({type: ""});
+    const [currentUsername, setCurrentUsername] = useState("");
     return (
         <>
             <Header logoutClicked={logoutClicked}
@@ -97,7 +98,9 @@ export default function FakeStackOverflow() {
                         setDbFailure={setDbFailure}/>}
                 {showState === 8 &&
                     <Profile setCurrentQuestion={setCurrentQuestion}
-                        nextState={setShowState}/>}
+                        nextState={setShowState}
+                        currentUsername={currentUsername}
+                        setCurrentUsername={setCurrentUsername}/>}
             </div>
         </>
     );

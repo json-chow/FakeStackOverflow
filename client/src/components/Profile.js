@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react"
 
-export default function Profile( {setCurrentQuestion, nextState} ) {
+export default function Profile( {currentUsername, setCurrentUsername, setCurrentQuestion, nextState} ) {
     const [info, setInfo] = useState({update: 1, view: 0});
     if (info["update"] === 1) {
         axios.get("http://localhost:8000/profile", {withCredentials: true}).then((res) => {
@@ -10,10 +10,16 @@ export default function Profile( {setCurrentQuestion, nextState} ) {
                      name: res.data["name"],
                      dateCreated: res.data["dateCreated"],
                      rep: res.data["reputation"],
-                     questions: res.data["questions"]});
+                     questions: res.data["questions"],
+                     accounts: res.data["accounts"]
+                    });
         }).catch((e) => {
             nextState(5);
         })
+    }
+    console.log("info.accounts: " + info.accounts);
+    if (info.accounts) {
+        displayUserAccounts(info.accounts, nextState, info, setInfo);
     }
     let questionTitles;
     if (info.questions) {
@@ -70,4 +76,49 @@ function getDateDiff(date) {
         dateDiff = Math.trunc(months / 12) + " years, " + months - (Math.trunc(months / 12) * 12) + " months"
     }
     return dateDiff
+}
+
+async function displayUserAccounts(accounts, nextState, info, setInfo) {
+    let userProfiles;
+    if (accounts) {
+        userProfiles = accounts.map((account) => {
+            console.log(account);
+            return(
+                <div>
+                    <button key={account.username} className="userProfile" onClick={async () => {
+                        axios.get("http://localhost:8000/profile", {withCredentials: true}, 
+                        {params: {
+                            username: account.username
+                        }}
+                        ).then((res) => {
+                            setInfo({update: 0,
+                                     view: info.view,
+                                     name: res.data["name"],
+                                     dateCreated: res.data["dateCreated"],
+                                     rep: res.data["reputation"],
+                                     questions: res.data["questions"],
+                                     accounts: res.data["accounts"]
+                                    });
+                        }).catch((e) => {
+                            nextState(5);
+                        })
+                    }}>{account.username}</button>
+                    <button key={account.username} className="deleteUser" onClick={async () => {
+                        await axios.post("http://localhost:8000/delete_account",
+                        {params: {
+                            username: account.username
+                        }});
+                    }}>{account.username}</button>
+                </div>
+            )
+        });
+        <div id="userProfiles">
+            {userProfiles}
+        </div>
+    }
+    else {
+        <div>
+            No user profiles in database.
+        </div>
+    }
 }

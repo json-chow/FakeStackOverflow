@@ -79,7 +79,7 @@ app.post('/logout', async(req,res) => {
     }
 });
 
-app.post('/user', async(req,res) => {
+app.post('/create_session', async(req,res) => {
     const account = await Account.find({username: req.body.username});
     if (!account || account[0] === undefined) {
         res.send("usrW1");
@@ -410,13 +410,38 @@ app.post("/question/:qid/delete", isSignedIn, async(req, res) => {
     res.sendStatus(200);
 });
 
+app.post('/delete_account', async(req,res) => {
+    let deletedSession = await Session.deleteOne({id: req.params.username});
+    let deletedAccount = await Account.deleteOne({id: req.params.username});
+    if (deletedAccount) {
+        res.send("accountDeleted");
+    }
+    else {
+        res.send("accountNotFound");
+    }
+});
+
 app.get("/profile", isSignedIn, async(req, res) => {
     let account = await Account.findOne({username: req.session.user});
     let questions = await Question.find({asked_by: account.username}).populate("tags");
-    res.send({name: account.username,
-              dateCreated: account.dateCreated,
-              reputation: account.reputation,
-              questions: questions});
+    if (account.admin) {
+        let userAccounts = await Account.find({});
+        res.send({
+            name: account.username,
+            dateCreated: account.dateCreated,
+            reputation: account.reputation,
+            questions: questions,
+            accounts: userAccounts
+        });
+    }
+    else {
+        res.send({
+            name: account.username,
+            dateCreated: account.dateCreated,
+            reputation: account.reputation,
+            questions: questions
+        });
+    }
 })
 
 app.listen(8000, () => {
