@@ -1,24 +1,47 @@
+import { useState } from "react";
 import CommentSection from "./CommentSection";
 import Vote from "./Vote";
 
-export default function Answer({model, answer, nextState, notLoggedIn}) {
+export default function Answer({model, answer, nextState, notLoggedIn, setEdit, update, setUpdate}) {
+    const [info, setInfo] = useState({update: 1, isOwner: false})
+    if (info.update === 1) {
+      model.get(`http://localhost:8000/answer/${answer._id}`, {withCredentials: true}).then((res) => {
+        setInfo({update: 0, isOwner: res.data.isOwner, ans: res.data.ans});
+      })
+    }
+    answer = info.ans ? info.ans : answer
     let aText = replaceHyperlinks(answer.text);
     return (
       <div className="acolumn">
-          <div className="acolumn left">
-              <Vote model={model} aid={answer._id} nextState={nextState}/>
-          </div>
+        <div className="acolumn left">
+          <Vote model={model} aid={answer._id} nextState={nextState}/>
+        </div>
 
-          <div className="acolumn mid">
-              <p>{aText}</p>
-              <br/>
-              <CommentSection model={model} aid={answer._id} nextState={nextState} notLoggedIn={notLoggedIn}/>
-          </div>
+        <div className="acolumn mid">
+          <p>{aText}</p>
+          <br/>
+          <CommentSection model={model} aid={answer._id} nextState={nextState} notLoggedIn={notLoggedIn}/>
+        </div>
 
-          <div className="acolumn right">
-              <p className="author">{answer.ans_by}</p>
-              <p className="dateAsked">{getTimeString(answer.ans_date_time, "answered")}</p>
+        <div className="acolumn right">
+          <p className="author">{answer.ans_by}</p>
+          <p className="dateAsked">{getTimeString(answer.ans_date_time, "answered")}</p>
+        </div>
+
+        {info.isOwner && 
+          <div className="acolumn right2">
+            <button style={{display: "block"}} onClick={() => {
+              setEdit(info.ans);
+              nextState(3);
+            }}>Edit</button>
+            <button onClick={() => {
+              model.post(`http://localhost:8000/answer/${answer._id}/delete`, {}, {withCredentials: true}).then((res) => {
+                setUpdate({...update, val: 0})
+                nextState(1)
+              }).catch((e) => nextState(5))
+            }}>Delete</button>
           </div>
+        }
       </div>
     )
 }

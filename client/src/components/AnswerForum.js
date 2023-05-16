@@ -3,7 +3,7 @@ import Answer from './Answer.js';
 import CommentSection from './CommentSection.js';
 import Vote from './Vote.js';
 
-export default function AnswerForum( {model, nextState, notLoggedIn, currentQuestion, setDbFailure} ) {
+export default function AnswerForum( {model, nextState, notLoggedIn, currentQuestion, setDbFailure, edit, setEdit} ) {
     const [update, setUpdate] = useState({val: 0, answers: "", question: currentQuestion, numAnswers: 0, page: 1, max: 1, incViews: 1});
     if (update["val"] === 0) {
         model.get(`http://localhost:8000/posts/question/${currentQuestion._id}`, {
@@ -17,7 +17,15 @@ export default function AnswerForum( {model, nextState, notLoggedIn, currentQues
                 let tags = res.data["tags"];
                 currentQuestion = res.data["question"];
                 let shown_answers = answers.map((answer) => 
-                    <Answer key={answer._id} model={model} answer={answer} nextState={nextState} notLoggedIn={notLoggedIn}/>
+                    <Answer key={answer._id}
+                            model={model}
+                            answer={answer}
+                            nextState={nextState}
+                            notLoggedIn={notLoggedIn}
+                            edit={edit}
+                            setEdit={setEdit}
+                            setUpdate={setUpdate}
+                            update={update}/>
                 )
                 let shown_tags = tags.map((tag) => 
                     <span className="qtag" key={tag._id}>{tag.name}</span>
