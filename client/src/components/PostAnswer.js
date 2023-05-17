@@ -1,9 +1,8 @@
 
 import { useState } from "react";
 
-export default function PostAnswer( {model, qid, nextState, notLoggedIn, setUserState, setDbFailure} ) {
-    const [answerText, setAnswerText] = useState("");
-
+export default function PostAnswer( {model, qid, nextState, notLoggedIn, setUserState, setDbFailure, edit} ) {
+    const [answerText, setAnswerText] = useState(edit.text ? edit.text : "");
     return (
         <div className="menu main">
             <div>
@@ -31,8 +30,7 @@ export default function PostAnswer( {model, qid, nextState, notLoggedIn, setUser
                 if (detectBadHyperlink()) {
                     document.getElementById("ahyperlinkError").hidden = false;
                 } else {
-                    let result = await processAnswerPost(model, {text: answerText, ansDate : new Date()}, qid, setDbFailure);
-                    console.log(result);
+                    let result = await processAnswerPost(model, {text: answerText, ansDate : new Date(), aid: edit._id ? edit._id : -1}, qid, setDbFailure);
                     if (result === 1) {
                         nextState(1);
                     } else if (result === 2) {
@@ -40,7 +38,7 @@ export default function PostAnswer( {model, qid, nextState, notLoggedIn, setUser
                         nextState(5);
                     }
                 }
-            }}>Post Answer</button>
+            }}>{(edit ? "Edit" : "Post") + " Answer"}</button>
             <div className="answerMandatoryFieldsWarning">* indicates mandatory fields</div>
         </div>
     )

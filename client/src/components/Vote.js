@@ -19,16 +19,24 @@ export default function Vote( {model, qid, aid, cid, nextState} ) {
                 <button className="upvote" style={{borderBottomColor: update["vote"] === 1 ? "orange" : "darkgray"}} onClick={() => {
                     model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/votes/1`, {}, {withCredentials: true}).then((res) => {
                         setUpdate({val: 0, votes: res.data["votes"]})
-                    }).catch((res) => {
-                        nextState(5);
+                    }).catch((e) => {
+                        if (e.response.status === 403) {
+                            window.alert("Not enough reputation to vote.")
+                        } else {
+                            nextState(5);
+                        }
                     })
                 }}></button>
                 <div className="voteNum">{update["votes"]} votes</div>
                 <button className="downvote" style={{borderTopColor: update["vote"] === -1 ? "orange" : "darkgray"}} onClick={() => {
                     model.post(`http://localhost:8000/posts/${qid ? "question" : "answer"}/${qid ? qid : aid}/votes/-1`, {}, {withCredentials: true}).then((res) => {
                         setUpdate({val: 0, votes: res.data["votes"]})
-                    }).catch((res) => {
-                        nextState(5);
+                    }).catch((e) => {
+                        if (e.response.status === 403) {
+                            window.alert("Not enough reputation to vote.")
+                        } else {
+                            nextState(5);
+                        }
                     })
                 }}></button>
             </>}
@@ -36,7 +44,7 @@ export default function Vote( {model, qid, aid, cid, nextState} ) {
                 <button className="upvote" style={{borderBottomColor: update["vote"] === 1 ? "orange" : "darkgray"}} onClick={() => {
                     model.post(`http://localhost:8000/comments/${cid}/votes/1"}`, {}, {withCredentials: true}).then((res) => {
                         setUpdate({val: 0, votes: res.data["votes"]})
-                    }).catch((res) => {
+                    }).catch((e) => {
                         nextState(5);
                     })
                 }}></button>

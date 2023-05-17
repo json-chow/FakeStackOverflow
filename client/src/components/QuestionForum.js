@@ -3,7 +3,7 @@ import { useState } from "react";
 
 var prevQuery = {tags: [], nontags: [], sortBy: undefined};
 
-export default function QuestionForum( {model, query, setQuery, setSideColor, nextState, notLoggedIn, setCurrentQuestion} ) {
+export default function QuestionForum( {model, query, setQuery, setSideColor, nextState, notLoggedIn, setCurrentQuestion, setEdit} ) {
     const [update, setUpdate] = useState({val: 0, questions: [], tags: [], numQuestions: 0, page: 1, max: 1});
     if (update["val"] === 0) {
         model.get("http://localhost:8000/", {
@@ -58,7 +58,7 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
         questionRows = <p id="noquestions">No Questions Found</p>;
     } else {
         questionRows = questions.map((question) => 
-            <Question question={question} nextState={nextState} setCurrentQuestion={setCurrentQuestion} tags={tags} key={question._id}/>
+            <Question question={question} nextState={nextState} setCurrentQuestion={setCurrentQuestion} tags={tags} setEdit={setEdit} key={question._id}/>
         )
     }
     return (

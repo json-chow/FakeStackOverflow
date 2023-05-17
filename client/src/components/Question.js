@@ -1,4 +1,4 @@
-export default function Question( {question, nextState, setCurrentQuestion, tags} ) {
+export default function Question( {question, nextState, setCurrentQuestion, tags, setEdit} ) {
     return (
         <div className="qcolumn">
             <div className="qcolumn left">
@@ -8,6 +8,7 @@ export default function Question( {question, nextState, setCurrentQuestion, tags
             </div>
             <div className="qcolumn mid">
                 <button style={{display: "block"}} onClick={() => {
+                    setEdit(false)
                     nextState(1);
                     setCurrentQuestion(question)
                 }}>

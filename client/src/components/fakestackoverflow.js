@@ -24,6 +24,7 @@ export default function FakeStackOverflow() {
     const [cookieState, setCookie] = useState({name: "", val: ""});
     const [dbFailure, setDbFailure] = useState({type: ""});
     const [currentUsername, setCurrentUsername] = useState("");
+    const [edit, setEdit] = useState(false);
     return (
         <>
             <Header logoutClicked={logoutClicked}
@@ -46,13 +47,16 @@ export default function FakeStackOverflow() {
                         setSideColor={setSideColor}
                         nextState={setShowState}
                         notLoggedIn={notLoggedIn}
-                        setCurrentQuestion={setCurrentQuestion}/>
+                        setCurrentQuestion={setCurrentQuestion}
+                        setEdit={setEdit}/>
                     }
                 {showState === 1 && 
                     <AnswerForum model={axios}
                         currentQuestion={currentQuestion}
                         nextState={setShowState}
-                        notLoggedIn={notLoggedIn}/>
+                        notLoggedIn={notLoggedIn}
+                        edit={edit}
+                        setEdit={setEdit}/>
                     }
                 {showState === 2 &&
                     <AskQuestion model={axios}
@@ -69,7 +73,8 @@ export default function FakeStackOverflow() {
                         nextState={setShowState}
                         notLoggedIn={notLoggedIn}
                         setUserState={setUserState}
-                        setDbFailure={setDbFailure}/>}
+                        setDbFailure={setDbFailure}
+                        edit={edit}/>}
                 {showState === 4 && 
                     <TagPage model={axios}
                         setSideColor={setSideColor}
@@ -100,7 +105,10 @@ export default function FakeStackOverflow() {
                     <Profile setCurrentQuestion={setCurrentQuestion}
                         nextState={setShowState}
                         currentUsername={currentUsername}
-                        setCurrentUsername={setCurrentUsername}/>}
+                        setCurrentUsername={setCurrentUsername}
+                        setSideColor={setSideColor}
+                        setQuery={setQuery}
+                        setEdit={setEdit}/>}
             </div>
         </>
     );

@@ -80,8 +80,12 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                 <div id="tagError" className="qError" hidden={true}>
                     Enter between 1 to 5 tags, each at most 10 characters long.
                 </div>
+                <div id="tagRepErr" className="qError" hidden={true}>
+                    Not enough reputation to create new tags.
+                </div>
             </div>
             <button className="postQuestion" hidden={notLoggedIn} onClick={async () => {
+                document.getElementById("tagRepErr").hidden = true;
                 if (detectBadHyperlink("questionText")) {
                     document.getElementById("hyperlinkError").hidden = false;
                 } else if (detectBadHyperlink("questionSummary")) {
@@ -96,13 +100,14 @@ export default function AskQuestion( {model, setSideColor, nextState, notLoggedI
                         qid: edit ? currentQuestion._id : -1
                     }, edit,
                     setDbFailure);
-                    console.log(result)
                     if (result === 1) {
                         setSideColor(0);
                         nextState(0);
                     } else if (result === 2) {
                         setUserState(0);
                         nextState(5);
+                    } else if (result === 3) {
+                        document.getElementById("tagRepErr").hidden = false;
                     }
                 }
             }}>{(edit ? "Modify" : "Post") + " Question"}</button>
@@ -195,9 +200,14 @@ async function processQuestionPost(model, candidateQuestion, edit, setDbFailure)
             await model.post("http://localhost:8000/new_question", {...candidateQuestion, edit: edit}, {withCredentials: true});
             return 1;
         } catch (e) {
-            console.log("bad session");
-            setDbFailure("question");
-            return 2;
+            if (e.response.status === 403) {
+                // Low reputation
+                return 3;
+            } else {
+                console.log("bad session");
+                setDbFailure("question");
+                return 2;
+            }
         }
     } else {
         return 0;

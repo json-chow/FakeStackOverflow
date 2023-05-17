@@ -257,6 +257,11 @@ app.post("/posts/question/:qid/votes/:amt", isSignedIn, async (req, res) => {
     let voteAmt = parseInt(req.params.amt);
     let qid = req.params.qid;
     let account = await Account.findOne({username: req.session.user});
+    // Check reputation
+    if (account.reputation < 50) {
+        res.sendStatus(403)
+        return
+    }
     let question;
     if (voteAmt == 1) { // Upvote case
         if (account.questionUpvotes && account.questionUpvotes.includes(qid)) {
@@ -300,6 +305,11 @@ app.post("/posts/answer/:aid/votes/:amt", isSignedIn, async (req, res) => {
     let voteAmt = parseInt(req.params.amt);
     let aid = req.params.aid;
     let account = await Account.findOne({username: req.session.user});
+    // Check reputation
+    if (account.reputation < 50) {
+        res.sendStatus(403)
+        return
+    }
     let answer;
     if (voteAmt == 1) { // Upvote case
         if (account.answerUpvotes && account.answerUpvotes.includes(aid)) {
@@ -362,20 +372,36 @@ app.get("/tags", async(req, res) => {
 });
 
 app.post("/new_answer", isSignedIn, async(req, res) => {
-    let answerFields = {
-        text: req.body.candidateAnswer.text,
-        ans_by: req.session.user,
-        ans_date_time: req.body.candidateAnswer.ansDate
+    let aid = req.body.candidateAnswer.aid;
+    if (aid === -1) {
+        let answerFields = {
+            text: req.body.candidateAnswer.text,
+            ans_by: req.session.user,
+            ans_date_time: req.body.candidateAnswer.ansDate
+        }
+        let newAnswer = new Answer(answerFields);
+        await newAnswer.save();
+        await Question.findByIdAndUpdate(req.body.qid, {$push: {answers: newAnswer}});
+        res.sendStatus(200);
+    } else {
+        await Answer.findByIdAndUpdate(aid, {text: req.body.candidateAnswer.text})
+        res.sendStatus(200);
     }
-    let newAnswer = new Answer(answerFields);
-    await newAnswer.save();
-    await Question.findByIdAndUpdate(req.body.qid, {$push: {answers: newAnswer}});
-    console.log("saved answer");
-    res.sendStatus(200);
 });
 
 app.post("/new_question", isSignedIn, async(req, res) => {
     let edit = req.body.edit;
+    for (let i=0; i<req.body.tagIds[0].length; i++) {
+        let tag = await Tag.find({name: req.body.tagIds[0][i]})
+        if (tag.length === 0) {
+            // Check user reputation
+            let account  = (await Account.find({username: req.session.user}))[0]
+            if (account.reputation < 50) {
+                res.sendStatus(403)
+                return
+            }
+        }
+    }
     let newTags = await getNewTags(req.body.tagIds[0]);
     let questionFields = {
         title: req.body.title,
@@ -411,6 +437,15 @@ app.post("/question/:qid/delete", isSignedIn, async(req, res) => {
     res.sendStatus(200);
 });
 
+app.post("/answer/:aid/delete", isSignedIn, async(req, res) => {
+    let answer = await Answer.findById(req.params.aid);
+    // Delete comments
+    await Comment.deleteMany({_id: {$in: answer.comments}});
+    // Delete question
+    await Answer.findByIdAndDelete(req.params.aid);
+    res.sendStatus(200);
+});
+
 app.post('/delete_account', async(req,res) => {
     let deletedSession = await Session.deleteOne({id: req.params.username});
     let deletedAccount = await Account.deleteOne({id: req.params.username});
@@ -422,10 +457,50 @@ app.post('/delete_account', async(req,res) => {
     }
 });
 
+app.get('/answer/:aid', async(req, res) => {
+    let ans = await Answer.findById(req.params.aid);
+    if (req.session.user) {
+        let filt_ans = await Answer.find({$and: [{_id: req.params.aid}, {ans_by: req.session.user}]});
+        if (filt_ans.length === 0) {
+            res.send({ans: ans, isOwner: false});
+        } else {
+            res.send({ans: ans, isOwner: true});
+        }
+    } else {
+        res.send({ans: ans, isOwner: false})
+    }
+})
+
+app.get('/tag/:tid', async(req, res) => {
+    let tag = await Tag.findById(req.params.tid)
+    let questions = await Question.find({})
+    res.send({tag: tag, questions: questions});
+})
+
+app.post('/tag/:tid/update', isSignedIn, async(req, res) => {
+    let tag = await Tag.findByIdAndUpdate(req.params.tid, {name: req.body.val})
+    res.sendStatus(200);
+})
+
+app.post('/tag/:tid/delete', isSignedIn, async(req, res) => {
+    // Check if other questions from other users have tag
+    let questions = await Question.find({$and: [{tags: req.params.tid}, {asked_by: {$ne: req.session.user}}]})
+    if (questions.length !== 0) {
+        res.sendStatus(403);
+    } else {
+        questions = await Question.find({tags: req.params.tid});
+        for (let i = 0; i < questions.length; i++) {
+            await Question.findByIdAndUpdate(questions[i]._id, {$pull: {tags: req.params.tid}});
+        }
+        await Tag.deleteOne({_id: req.params.tid});
+        res.sendStatus(200);
+    }
+})
+
 app.get("/profile", isSignedIn, async(req, res) => {
+    let type = parseInt(req.query.type);
     let account = await Account.findOne({username: req.session.user});
-    let questions = await Question.find({asked_by: account.username}).populate("tags");
-    console.log("account.admin: " + account.admin);
+    let questions = await Question.find({asked_by: account.username});
     if (account.admin) {
         let userAccounts = await Account.find({});
         console.log("userAccounts: " + userAccounts);
@@ -438,12 +513,33 @@ app.get("/profile", isSignedIn, async(req, res) => {
         });
     }
     else {
-        res.send({
-            name: account.username,
-            dateCreated: account.dateCreated,
-            reputation: account.reputation,
-            questions: questions
-        });
+        switch (type) {
+            case 0:
+                res.send({name: account.username,
+                          dateCreated: account.dateCreated,
+                          reputation: account.reputation,
+                          questions: questions});
+                break;
+            case 1:
+                let tag_ids = [...new Set(questions.map((question) => question.tags).flat())];
+                let tags = await Tag.find({_id: {$in: tag_ids}});
+                res.send({name: account.username,
+                    dateCreated: account.dateCreated,
+                    reputation: account.reputation,
+                    tags: tags});
+                break;
+            case 2:
+                let answers = await Answer.find({ans_by: account.username});
+                let ans_ids = [...new Set(answers.map((answer) => answer._id))];
+                questions = await Question.find({answers: {$in: ans_ids}}).sort({ask_date_time: -1, _id: -1});
+                res.send({name: account.username,
+                    dateCreated: account.dateCreated,
+                    reputation: account.reputation,
+                    questions: questions});
+                break;
+            default:
+                break;
+        }
     }
 })
 
