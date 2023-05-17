@@ -18,11 +18,7 @@ Have a background service of MongoDB running. Create an admin account by running
 
 ## Team Member 2 Contribution
 TODO_list:
-    Already completed cases 1 and 2
-    1. Logout => Done, except for possible system crash case
-    2. Guest => Just need to add exception
-    3. Add in regex for email => Added, needs testing
-    4. Registered user profile => Started
-    5. Admin user profile => Started
-    6. UML Diagram?
-    7. bcrypt
+-Created Create Account Page (case 1)
+-Login Page (case 2)
+-Case 3
+-Some of admin page
