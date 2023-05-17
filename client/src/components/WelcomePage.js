@@ -26,7 +26,6 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
                 document.getElementById("dbErrorAnswer").hidden=true;
                 document.getElementById("dbErrorComment").hidden=false;
             }
-            await timeout();
             setDbFailure("");
             setClicked(0);
             setUserState(1);
@@ -47,7 +46,6 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
             document.getElementById("dbErrorAnswer").hidden=true;
             document.getElementById("defaultMessage").hidden=true;
             document.getElementById("logoutMessage").hidden=false;
-            await timeout();
             setClicked(0);
             setUserState(1);
         }

@@ -74,7 +74,7 @@ export default function QuestionForum( {model, query, setQuery, setSideColor, ne
                             nextState(2);
                         } catch (e) {
                             setCurrentQuestion(0);
-                            nextState(5)
+                            nextState(5);
                         }
                         
                     }}>

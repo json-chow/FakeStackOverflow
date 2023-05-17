@@ -69,8 +69,9 @@ app.get('/homepage', async(req, res) => {
 });
 
 app.post('/logout', async(req,res) => {
-    let deletedSession = await Session.deleteOne({id: req.session.user});
-    if (deletedSession) {
+    let deletedSessions = await Session.deleteMany({id: req.body.username});
+    console.log(deletedSessions);
+    if (deletedSessions) {
         req.session.destroy();
         res.send("Session ended with no errors.");
     }
@@ -424,8 +425,10 @@ app.post('/delete_account', async(req,res) => {
 app.get("/profile", isSignedIn, async(req, res) => {
     let account = await Account.findOne({username: req.session.user});
     let questions = await Question.find({asked_by: account.username}).populate("tags");
+    console.log("account.admin: " + account.admin);
     if (account.admin) {
         let userAccounts = await Account.find({});
+        console.log("userAccounts: " + userAccounts);
         res.send({
             name: account.username,
             dateCreated: account.dateCreated,
