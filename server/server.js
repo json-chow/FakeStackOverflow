@@ -256,6 +256,11 @@ app.post("/posts/question/:qid/votes/:amt", isSignedIn, async (req, res) => {
     let voteAmt = parseInt(req.params.amt);
     let qid = req.params.qid;
     let account = await Account.findOne({username: req.session.user});
+    // Check reputation
+    if (account.reputation < 50) {
+        res.sendStatus(403)
+        return
+    }
     let question;
     if (voteAmt == 1) { // Upvote case
         if (account.questionUpvotes && account.questionUpvotes.includes(qid)) {
@@ -299,6 +304,11 @@ app.post("/posts/answer/:aid/votes/:amt", isSignedIn, async (req, res) => {
     let voteAmt = parseInt(req.params.amt);
     let aid = req.params.aid;
     let account = await Account.findOne({username: req.session.user});
+    // Check reputation
+    if (account.reputation < 50) {
+        res.sendStatus(403)
+        return
+    }
     let answer;
     if (voteAmt == 1) { // Upvote case
         if (account.answerUpvotes && account.answerUpvotes.includes(aid)) {
@@ -380,6 +390,17 @@ app.post("/new_answer", isSignedIn, async(req, res) => {
 
 app.post("/new_question", isSignedIn, async(req, res) => {
     let edit = req.body.edit;
+    for (let i=0; i<req.body.tagIds[0].length; i++) {
+        let tag = await Tag.find({name: req.body.tagIds[0][i]})
+        if (tag.length === 0) {
+            // Check user reputation
+            let account  = (await Account.find({username: req.session.user}))[0]
+            if (account.reputation < 50) {
+                res.sendStatus(403)
+                return
+            }
+        }
+    }
     let newTags = await getNewTags(req.body.tagIds[0]);
     let questionFields = {
         title: req.body.title,
