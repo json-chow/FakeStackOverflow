@@ -413,6 +413,7 @@ app.post("/new_question", isSignedIn, async(req, res) => {
     }
     if (edit) {
         delete questionFields.ask_date_time;
+        delete questionFields.asked_by;
         await Question.findByIdAndUpdate(req.body.qid, questionFields)
     } else {
         let question = new Question(questionFields);
@@ -497,11 +498,36 @@ app.post('/tag/:tid/delete', isSignedIn, async(req, res) => {
     }
 })
 
+app.post('/profile/:pid/delete', isSignedIn, async(req, res) => {
+    await Account.findByIdAndDelete(req.params.pid);
+    res.sendStatus(200);
+})
+
 app.get("/profile", isSignedIn, async(req, res) => {
     let type = parseInt(req.query.type);
     let account = await Account.findOne({username: req.session.user});
     let questions = await Question.find({asked_by: account.username});
     if (account.admin) {
+        let adminOverride = req.query.adminView;
+        if (adminOverride) {
+            let userAcc = await Account.findById(adminOverride);
+            questions = await Question.find({asked_by: userAcc.username});
+            let tag_ids = [...new Set(questions.map((question) => question.tags).flat())];
+            let tags = await Tag.find({_id: {$in: tag_ids}});
+            let answers = await Answer.find({ans_by: userAcc.username});
+            let ans_ids = [...new Set(answers.map((answer) => answer._id))];
+            ans_q = await Question.find({answers: {$in: ans_ids}}).sort({ask_date_time: -1, _id: -1});
+            res.send({
+                name: userAcc.username,
+                dateCreated: userAcc.dateCreated,
+                reputation: userAcc.reputation,
+                questions: questions,
+                tags: tags,
+                ans_q: ans_q,
+                accounts: true
+            });
+            return
+        }
         let userAccounts = await Account.find({});
         console.log("userAccounts: " + userAccounts);
         res.send({

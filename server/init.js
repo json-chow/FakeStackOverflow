@@ -1,4 +1,5 @@
 let Account = require('./models/accounts');
+const bcrypt = require("bcrypt");
 
 let userArgs = process.argv.slice(2);
 
@@ -9,9 +10,13 @@ async function init() {
     let db = mongoose.connection;
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    let hashedPassword = await bcrypt.hash(userArgs[1], salt);
+
     accountdetail = {
         username: userArgs[0],
-        password: userArgs[1],
+        password: hashedPassword,
         accountName: "admin",
         dateCreated: Date.now(),
         admin: true

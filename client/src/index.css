@@ -758,8 +758,16 @@ CSS tags for 'Question Post' section:
     padding: 1em;
 }
 
-.profileQuestions, .userProfiles {
+.profileQuestions {
     display: block;
+    border: none;
+    color: rgb(0, 116, 204);
+    font-size: large;
+    background-color: white;
+}
+
+.userProfiles {
+    display: inline-block;
     border: none;
     color: rgb(0, 116, 204);
     font-size: large;

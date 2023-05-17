@@ -3,12 +3,13 @@ import Tag from "./Tag";
 import { useState } from "react"
 
 export default function Profile( {setCurrentQuestion, nextState, setSideColor, setQuery, setEdit} ) {
-    const [info, setInfo] = useState({update: 1, view: 0});
-    const [profile, setCurrentProfile] = useState({});
+    const [info, setInfo] = useState({update: 1, view: 0, adminAcc: 0, adminView: undefined});
     if (info["update"] === 1) {
+        console.log(info);
         axios.get("http://localhost:8000/profile", {
             params: {
-                type: info["view"]
+                type: info["view"],
+                adminView: info["adminView"]
             },
             withCredentials: true
         }).then((res) => {
@@ -19,7 +20,9 @@ export default function Profile( {setCurrentQuestion, nextState, setSideColor, s
                      rep: res.data["reputation"],
                      questions: res.data["questions"],
                      tags: res.data["tags"],
-                     accounts: res.data["accounts"]
+                     accounts: res.data["accounts"],
+                     adminAcc: res.data["accounts"] ? true : false,
+                     adminView: info["adminView"]
                     });
         }).catch((e) => {
             nextState(5);
@@ -71,106 +74,63 @@ export default function Profile( {setCurrentQuestion, nextState, setSideColor, s
         })
     }
 
-
-    if (info.accounts) {
-        let userProfiles = info.accounts.map((account) => {
+    let userProfiles;
+    if (info.view === 3 && info.adminAcc) {
+        userProfiles = info.accounts.map((account) => {
             return ( 
-                <button key={account._id} className="userProfiles" onClick={async() => {
-                    setCurrentProfile(account);
-                }}>{account.username}</button>
+                <>
+                    <button key={account._id} className="userProfiles" onClick={() => {
+                        setInfo({update: 1, view: 0, adminAcc: true, adminView: account._id});
+                    }}>{account.username}</button>
+                    <button key={account._id + "d"} className="deleteUP" onClick={() => {
+                        axios.post(`http://localhost:8000/profile/${account._id}/delete`, {}, {withCredentials: true}).then((res) => {
+                            setInfo({...info, update: 1})
+                        })
+                    }}>Delete</button>
+                    <br/>
+                </>
             );
         });
-
-        return (
-            <div className="menu main">
-                <div className="menu main top">
-                    <div id="username">{info.name}</div>
-                    <div id="usercreationtime">{"Member for " + getDateDiff(info.dateCreated)}</div>
-                    <div id="reputation">{"Reputation: " + info.rep}</div>
-                </div>
-                <div className="menu main bottom">
-                    <div id="profileOptions">
-                        <div>
-                            <button className="profileBtn" style={{backgroundColor: info.view === 0 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                                setInfo({...info, view: 0});
-                            }}>Users</button>
-                            <div>
-                                {userProfiles}
-                            </div>
-                        </div>
-                        <div>
-                            <div id="profileOptions">
-                                <div>
-                                    <button className="profileBtn" style={{backgroundColor: info.view === 1 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                                        setInfo({...info, view: 1})
-                                    }}>Questions 
-                                    </button>
-                                    <div id="profileContent">
-                                        {questionTitles}
-                                    </div>
-                                </div>
-                            <div>
-                                <button className="profileBtn" style={{backgroundColor: info.view === 2 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                                    setInfo({...info, view: 2})
-                                }}>Tags
-                                </button>
-                                <div>
-                                    
-                                </div>
-                            </div>
-                            <div>
-                                <button className="profileBtn" style={{backgroundColor: info.view === 3 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                                    setInfo({...info, view: 3})
-                                }}>Answered Questions</button>
-                                    <div>
-                                        
-                                    </div>
-                            </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
     }
-
-
-
-    else {
-        return (
-            <div className="menu main">
-                <div className="menu main top">
-                    <div id="username">{info.name}</div>
-                    <div id="usercreationtime">{"Member for " + getDateDiff(info.dateCreated)}</div>
-                    <div id="reputation">{"Reputation: " + info.rep}</div>
+    return (
+        <div className="menu main">
+            <div className="menu main top">
+                <div id="username">{info.name}</div>
+                <div id="usercreationtime">{"Member for " + getDateDiff(info.dateCreated)}</div>
+                <div id="reputation">{"Reputation: " + info.rep}</div>
+            </div>
+            <div className="menu main bottom">
+                <div id="profileOptions">
+                    {(info.adminAcc && !info.adminView) && <button className="profileBtn" style={{backgroundColor: info.view === 3 ? "rgb(241,242,243)" : "white"}} onClick={() => {
+                        setInfo({...info, update: 1, view: 3})
+                    }}>Users</button>}
+                    <button className="profileBtn" style={{backgroundColor: info.view === 0 ? "rgb(241,242,243)" : "white"}} onClick={() => {
+                        setInfo({...info, update: 1, view: 0})
+                    }}>Questions</button>
+                    <button className="profileBtn" style={{backgroundColor: info.view === 1 ? "rgb(241,242,243)" : "white"}} onClick={() => {
+                        setInfo({...info, update: 1, view: 1})
+                    }}>Tags</button>
+                    <button className="profileBtn" style={{backgroundColor: info.view === 2 ? "rgb(241,242,243)" : "white"}} onClick={() => {
+                        setInfo({...info, update: 1, view: 2})
+                    }}>Answered Questions</button>
                 </div>
-                <div className="menu main bottom">
-                    <div id="profileOptions">
-                        <button className="profileBtn" style={{backgroundColor: info.view === 0 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                            setInfo({...info, update: 1, view: 0})
-                        }}>Questions</button>
-                        <button className="profileBtn" style={{backgroundColor: info.view === 1 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                            setInfo({...info, update: 1, view: 1})
-                        }}>Tags</button>
-                        <button className="profileBtn" style={{backgroundColor: info.view === 2 ? "rgb(241,242,243)" : "white"}} onClick={() => {
-                            setInfo({...info, update: 1, view: 2})
-                        }}>Answered Questions</button>
-                    </div>
-                    <div id="profileContent">
-                        {info.view === 0 && questionTitles}
-                        {info.view === 1 &&
-                            <div className="tag bottom">
-                                <table>
-                                    <tbody>{tableContents}</tbody>
-                                </table>
-                            </div>
-                        }
-                        {info.view === 2 && questionTitles}
-                    </div>
+                <div id="profileContent">
+                    {info.view === 0 && questionTitles}
+                    {info.view === 1 &&
+                        <div className="tag bottom">
+                            <table>
+                                <tbody>{tableContents}</tbody>
+                            </table>
+                        </div>
+                    }
+                    {info.view === 2 && questionTitles}
+                    {info.view === 3 && userProfiles}
                 </div>
             </div>
-        )}
+        </div>
+    )
 }
+
 
 function getDateDiff(date) {
     date = new Date(date);
