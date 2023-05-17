@@ -4,7 +4,6 @@ const timeout = async() => {
 }
 
 export default function WelcomePage( {model, logoutClicked, setClicked, nextState, setUserState, userState, dbFailure, setDbFailure} ) {
-    console.log("UserState: " + userState);
     model.get("http://localhost:8000/homepage", {withCredentials: true}).then(async (res) => {
         console.log("Response from Server: " + res.data);
         console.log(dbFailure.type);
@@ -32,16 +31,10 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
             nextState(5);
         }
         else if (res.data === "sessionFound") { // session is stored => redirect user to homepage
-            console.log("sessionFound");
-            console.log("userState: " + userState);
-            console.log("logoutClicked: " + logoutClicked);
             setUserState(0);
             nextState(0);
         }
         else if (logoutClicked && userState) { // Logout successful => redirect user to welcome page
-            console.log("logged out");
-            console.log("userState: " + userState);
-            console.log("logoutClicked: " + logoutClicked);
             document.getElementById("dbErrorQuestion").hidden=true;
             document.getElementById("dbErrorAnswer").hidden=true;
             document.getElementById("defaultMessage").hidden=true;
@@ -50,9 +43,6 @@ export default function WelcomePage( {model, logoutClicked, setClicked, nextStat
             setUserState(1);
         }
         else if (!logoutClicked) { // initial welcome page message
-            console.log("initialHomepage");
-            console.log("userState: " + userState);
-            console.log("logoutClicked: " + logoutClicked);
             document.getElementById("dbErrorQuestion").hidden=true;
             document.getElementById("dbErrorAnswer").hidden=true;
             document.getElementById("defaultMessage").hidden=false;
